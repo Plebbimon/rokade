@@ -95,3 +95,59 @@ td.result {
   white-space: nowrap;
   color: var(--muted);
 }
+
+.muted {
+  color: var(--muted);
+}
+
+ul.plain {
+  list-style: none;
+  padding: 0;
+}
+
+form.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-width: 24rem;
+}
+
+form.stack label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+form.row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+  margin: 0.75rem 0;
+}
+
+input,
+select,
+button {
+  font: inherit;
+  color: inherit;
+  background: transparent;
+  border: 1px solid color-mix(in srgb, var(--fg) 30%, transparent);
+  border-radius: 4px;
+  padding: 0.35rem 0.6rem;
+}
+
+select option {
+  color: initial;
+}
+
+button {
+  cursor: pointer;
+  font-weight: 600;
+}
+
+button:hover {
+  background: color-mix(in srgb, var(--fg) 8%, transparent);
+}

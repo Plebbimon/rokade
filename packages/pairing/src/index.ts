@@ -65,7 +65,11 @@ export async function pairTournamentNextRound(
   tournament: Tournament,
   options: PairOptions = {},
 ): Promise<Round> {
-  const pairings = await pairNextRound(serializeTrf(toTrf(tournament)), options);
+  const trf = toTrf(tournament);
+  // The engine needs to know the first player's initial color to pair
+  // round 1; later rounds derive colors from the game history.
+  if (tournament.rounds.length === 0) trf.configurationLines.push("XXC white1");
+  const pairings = await pairNextRound(serializeTrf(trf), options);
 
   const byStartRank = (rank: number) => {
     const player = tournament.players[rank - 1];

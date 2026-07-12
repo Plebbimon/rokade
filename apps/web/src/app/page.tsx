@@ -16,6 +16,8 @@ export default function Home() {
         <li>Påmelding, live resultater og turneringssider (planlagt)</li>
       </ul>
       <p className="cta">
+        <Link href="/turneringer">Administrer turneringer →</Link>
+        <br />
         <Link href="/demo">Se demo-turneringen med stilling og kvalitetsberegning →</Link>
       </p>
     </main>

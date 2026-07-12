@@ -53,4 +53,14 @@ describe.skipIf(!binaryAvailable)("pairNextRound (bbpPairings integration)", () 
     const updated = addRound(tournament, round);
     expect(updated.rounds).toHaveLength(3);
   });
+
+  it("pairs round 1 of a fresh tournament", async () => {
+    const tournament = { ...exampleTournament(), rounds: [] };
+    const round = await pairTournamentNextRound(tournament, { binaryPath });
+
+    expect(round.number).toBe(1);
+    expect(round.boards).toHaveLength(3);
+    const seen = round.boards.flatMap((b) => [b.white, b.black]).sort();
+    expect(seen).toEqual(["anna", "bjorn", "cecilie", "david", "erik", "frida"]);
+  });
 });

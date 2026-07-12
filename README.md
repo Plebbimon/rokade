@@ -59,9 +59,11 @@ npm run dev           # web app on http://localhost:3000
       incl. the Article 16 unplayed-round rules (cut-1's Art. 16.5 interpretation
       still to be validated against the FIDE arbiter exercises)
 - [x] Demo page: standings with tiebreak columns rendered from the domain model (`/demo`)
-- [ ] Persistence (PostgreSQL/Drizzle)
+- [x] Arbiter UI, first slice (`/turneringer`): create tournament (Swiss/Berger),
+      register players, set up rounds, enter results, live standings
+- [x] Persistence behind a `TournamentStore` interface (JSON files in `.data/`
+      for now; PostgreSQL/Drizzle later without touching service or UI)
 - [ ] NSF Monrad pairing (rules requested from NSF)
-- [ ] Arbiter UI: registration, result entry, round management
 - [ ] Public pages: tournament page, standings, terminliste (calendar)
 - [ ] NSF ELO report generation (needs one sample report file)
 - [ ] NSF member-database adapter (needs API access)
