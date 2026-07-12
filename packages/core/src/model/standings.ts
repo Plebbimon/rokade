@@ -1,53 +1,48 @@
-import { BLACK_POINTS, BYE_POINTS, WHITE_POINTS } from "./results.js";
+import { playerPoints, roundOutcomes } from "./outcomes.js";
+import { tiebreak, type TiebreakKey } from "./tiebreaks.js";
 import type { PlayerId, Tournament } from "./types.js";
 
 export interface StandingEntry {
   playerId: PlayerId;
   points: number;
   gamesPlayed: number;
+  /** Values for the requested tiebreaks, in the order they were given. */
+  tiebreaks: number[];
   rank: number;
 }
 
-/** Total points for one player across all recorded rounds. */
-export function playerPoints(tournament: Tournament, playerId: PlayerId): number {
-  let points = 0;
-  for (const round of tournament.rounds) {
-    for (const board of round.boards) {
-      if (board.result === null) continue;
-      if (board.white === playerId) points += WHITE_POINTS[board.result];
-      if (board.black === playerId) points += BLACK_POINTS[board.result];
-    }
-    for (const bye of round.byes) {
-      if (bye.player === playerId) points += BYE_POINTS[bye.type];
-    }
-  }
-  return points;
+export interface StandingsOptions {
+  /** Applied in order after points; higher is better for all supported keys. */
+  tiebreaks?: TiebreakKey[];
 }
 
-/**
- * Current standings, ordered by points (desc) with seed order as the only
- * tiebreak for now. Proper tiebreaks (Buchholz etc. per the FIDE 2023
- * regulations and NSF practice) are a separate, later step.
- */
-export function standings(tournament: Tournament): StandingEntry[] {
-  const entries = tournament.players.map((player, seedIndex) => {
-    let gamesPlayed = 0;
-    for (const round of tournament.rounds) {
-      for (const board of round.boards) {
-        if (board.result !== null && (board.white === player.id || board.black === player.id)) {
-          gamesPlayed += 1;
-        }
-      }
-    }
-    return {
-      playerId: player.id,
-      points: playerPoints(tournament, player.id),
-      gamesPlayed,
-      seedIndex,
-    };
-  });
+export { playerPoints };
 
-  entries.sort((a, b) => b.points - a.points || a.seedIndex - b.seedIndex);
+/**
+ * Current standings: points first, then the given tiebreaks in order, with
+ * seed order as the final deterministic fallback.
+ */
+export function standings(
+  tournament: Tournament,
+  options: StandingsOptions = {},
+): StandingEntry[] {
+  const keys = options.tiebreaks ?? [];
+
+  const entries = tournament.players.map((player, seedIndex) => ({
+    playerId: player.id,
+    points: playerPoints(tournament, player.id),
+    gamesPlayed: roundOutcomes(tournament, player.id).filter((o) => o.kind === "game").length,
+    tiebreaks: keys.map((key) => tiebreak(tournament, player.id, key)),
+    seedIndex,
+  }));
+
+  entries.sort((a, b) => {
+    if (a.points !== b.points) return b.points - a.points;
+    for (let i = 0; i < keys.length; i++) {
+      if (a.tiebreaks[i] !== b.tiebreaks[i]) return b.tiebreaks[i]! - a.tiebreaks[i]!;
+    }
+    return a.seedIndex - b.seedIndex;
+  });
 
   return entries.map(({ seedIndex: _seedIndex, ...entry }, index) => ({
     ...entry,

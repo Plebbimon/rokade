@@ -49,3 +49,49 @@ ul {
 li {
   margin-bottom: 0.5rem;
 }
+
+h2 {
+  font-size: 1.25rem;
+  margin: 2rem 0 0.75rem;
+}
+
+p.cta {
+  margin-top: 2rem;
+}
+
+a {
+  color: inherit;
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+th,
+td {
+  padding: 0.4rem 0.75rem;
+  text-align: center;
+  border-bottom: 1px solid color-mix(in srgb, var(--fg) 15%, transparent);
+}
+
+th {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+}
+
+th.left,
+td.left {
+  text-align: left;
+}
+
+td.result {
+  white-space: nowrap;
+  color: var(--muted);
+}

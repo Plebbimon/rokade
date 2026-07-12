@@ -15,14 +15,14 @@ describe("standings", () => {
     expect(playerPoints(t, "erik")).toBe(0);
   });
 
-  it("ranks by points, then seed order (until real tiebreaks land)", () => {
+  it("ranks by points, then seed order when no tiebreaks are requested", () => {
     expect(standings(t)).toEqual([
-      { playerId: "anna", points: 1.5, gamesPlayed: 2, rank: 1 },
-      { playerId: "bjorn", points: 1.5, gamesPlayed: 2, rank: 2 },
-      { playerId: "frida", points: 1.5, gamesPlayed: 2, rank: 3 },
-      { playerId: "david", points: 1.0, gamesPlayed: 2, rank: 4 },
-      { playerId: "cecilie", points: 0.5, gamesPlayed: 2, rank: 5 },
-      { playerId: "erik", points: 0, gamesPlayed: 2, rank: 6 },
+      { playerId: "anna", points: 1.5, gamesPlayed: 2, tiebreaks: [], rank: 1 },
+      { playerId: "bjorn", points: 1.5, gamesPlayed: 2, tiebreaks: [], rank: 2 },
+      { playerId: "frida", points: 1.5, gamesPlayed: 2, tiebreaks: [], rank: 3 },
+      { playerId: "david", points: 1.0, gamesPlayed: 2, tiebreaks: [], rank: 4 },
+      { playerId: "cecilie", points: 0.5, gamesPlayed: 2, tiebreaks: [], rank: 5 },
+      { playerId: "erik", points: 0, gamesPlayed: 2, tiebreaks: [], rank: 6 },
     ]);
   });
 

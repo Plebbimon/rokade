@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function Home() {
   return (
     <main>
@@ -13,6 +15,9 @@ export default function Home() {
         <li>ELO-rapport til NSF (planlagt, avhenger av API-tilgang)</li>
         <li>Påmelding, live resultater og turneringssider (planlagt)</li>
       </ul>
+      <p className="cta">
+        <Link href="/demo">Se demo-turneringen med stilling og kvalitetsberegning →</Link>
+      </p>
     </main>
   );
 }

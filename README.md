@@ -55,8 +55,11 @@ npm run dev           # web app on http://localhost:3000
 - [x] bbpPairings adapter (FIDE Dutch, next-round pairing)
 - [x] Tournament domain model (participants, rounds, byes, standings, TRF bridge)
 - [x] Berger (round robin) pairing tables per FIDE Handbook C.05 Annex 1
+- [x] Tiebreaks per FIDE C.07 (2023): Buchholz, Buchholz cut-1, Sonneborn-Berger,
+      incl. the Article 16 unplayed-round rules (cut-1's Art. 16.5 interpretation
+      still to be validated against the FIDE arbiter exercises)
+- [x] Demo page: standings with tiebreak columns rendered from the domain model (`/demo`)
 - [ ] Persistence (PostgreSQL/Drizzle)
-- [ ] Tiebreaks (FIDE 2023 regulations subset used in Norway)
 - [ ] NSF Monrad pairing (rules requested from NSF)
 - [ ] Arbiter UI: registration, result entry, round management
 - [ ] Public pages: tournament page, standings, terminliste (calendar)

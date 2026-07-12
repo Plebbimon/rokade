@@ -20,7 +20,20 @@ export type {
   Tournament,
 } from "./model/types.js";
 export { addRound, recordResult } from "./model/tournament.js";
-export { playerPoints, standings, type StandingEntry } from "./model/standings.js";
+export {
+  playerPoints,
+  standings,
+  type StandingEntry,
+  type StandingsOptions,
+} from "./model/standings.js";
+export { roundOutcomes, type RoundOutcome } from "./model/outcomes.js";
+export {
+  adjustedScore,
+  buchholz,
+  sonnebornBerger,
+  tiebreak,
+  type TiebreakKey,
+} from "./model/tiebreaks.js";
 export { toTrf } from "./model/trf-bridge.js";
 export {
   bergerSchedule,
