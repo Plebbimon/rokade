@@ -19,7 +19,7 @@ package with zero framework dependencies, so it outlives any web-framework churn
 
 ```
 packages/core      Domain: tournament model, TRF16 parser/serializer,
-                   (soon) NSF Monrad & Berger pairing, tiebreaks, NSF ELO reports
+                   Berger round robin, (soon) NSF Monrad, tiebreaks, NSF ELO reports
 packages/pairing   Thin adapter around the bbpPairings binary (FIDE Dutch system)
 apps/web           Next.js: public tournament pages + arbiter UI (skeleton)
 ```
@@ -54,9 +54,9 @@ npm run dev           # web app on http://localhost:3000
 - [x] TRF16 parse/serialize with golden-file round-trip tests
 - [x] bbpPairings adapter (FIDE Dutch, next-round pairing)
 - [x] Tournament domain model (participants, rounds, byes, standings, TRF bridge)
+- [x] Berger (round robin) pairing tables per FIDE Handbook C.05 Annex 1
 - [ ] Persistence (PostgreSQL/Drizzle)
 - [ ] Tiebreaks (FIDE 2023 regulations subset used in Norway)
-- [ ] Berger (round robin) pairing tables
 - [ ] NSF Monrad pairing (rules requested from NSF)
 - [ ] Arbiter UI: registration, result entry, round management
 - [ ] Public pages: tournament page, standings, terminliste (calendar)

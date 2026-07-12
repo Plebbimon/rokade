@@ -22,3 +22,9 @@ export type {
 export { addRound, recordResult } from "./model/tournament.js";
 export { playerPoints, standings, type StandingEntry } from "./model/standings.js";
 export { toTrf } from "./model/trf-bridge.js";
+export {
+  bergerSchedule,
+  bergerRound,
+  type BergerSeatPairing,
+  type BergerRoundSchedule,
+} from "./model/berger.js";
