@@ -1,3 +1,5 @@
+import { serializeTrf, toTrf } from "@rokade/core";
+import type { Board, Round, RoundBye, Tournament } from "@rokade/core";
 import { execFile } from "node:child_process";
 import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
@@ -53,6 +55,40 @@ export async function pairNextRound(trf: string, options: PairOptions = {}): Pro
   } finally {
     await rm(dir, { recursive: true, force: true });
   }
+}
+
+/**
+ * Pair the next round of a domain Tournament with the FIDE Dutch system.
+ * Returns a Round (with undecided boards) ready for `addRound`.
+ */
+export async function pairTournamentNextRound(
+  tournament: Tournament,
+  options: PairOptions = {},
+): Promise<Round> {
+  const pairings = await pairNextRound(serializeTrf(toTrf(tournament)), options);
+
+  const byStartRank = (rank: number) => {
+    const player = tournament.players[rank - 1];
+    if (!player) throw new Error(`engine returned unknown start rank ${rank}`);
+    return player.id;
+  };
+
+  const boards: Board[] = [];
+  const byes: RoundBye[] = [];
+  for (const pairing of pairings) {
+    if (pairing.black === null) {
+      byes.push({ player: byStartRank(pairing.white), type: "pairing" });
+    } else {
+      boards.push({
+        boardNumber: boards.length + 1,
+        white: byStartRank(pairing.white),
+        black: byStartRank(pairing.black),
+        result: null,
+      });
+    }
+  }
+
+  return { number: tournament.rounds.length + 1, boards, byes };
 }
 
 /**

@@ -2,8 +2,9 @@ import { existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { exampleTournamentTrf } from "@rokade/core/fixtures";
-import { pairNextRound, parsePairingOutput } from "./index.js";
+import { addRound } from "@rokade/core";
+import { exampleTournament, exampleTournamentTrf } from "@rokade/core/fixtures";
+import { pairNextRound, pairTournamentNextRound, parsePairingOutput } from "./index.js";
 
 describe("parsePairingOutput", () => {
   it("parses boards and byes", () => {
@@ -36,5 +37,20 @@ describe.skipIf(!binaryAvailable)("pairNextRound (bbpPairings integration)", () 
     expect(pairings).toHaveLength(3);
     const seen = pairings.flatMap((p) => [p.white, p.black]).sort();
     expect(seen).toEqual([1, 2, 3, 4, 5, 6]);
+  });
+
+  it("pairs a domain Tournament into an addRound-ready Round", async () => {
+    const tournament = exampleTournament();
+    const round = await pairTournamentNextRound(tournament, { binaryPath });
+
+    expect(round.number).toBe(3);
+    expect(round.boards).toHaveLength(3);
+    expect(round.byes).toHaveLength(0);
+    const seen = round.boards.flatMap((b) => [b.white, b.black]).sort();
+    expect(seen).toEqual(["anna", "bjorn", "cecilie", "david", "erik", "frida"]);
+
+    // The engine's output must be directly usable by the domain model.
+    const updated = addRound(tournament, round);
+    expect(updated.rounds).toHaveLength(3);
   });
 });

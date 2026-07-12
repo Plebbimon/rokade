@@ -51,10 +51,11 @@ npm run dev           # web app on http://localhost:3000
 
 - [x] TRF16 parse/serialize with golden-file round-trip tests
 - [x] bbpPairings adapter (FIDE Dutch, next-round pairing)
-- [ ] Tournament domain model + persistence (PostgreSQL/Drizzle)
+- [x] Tournament domain model (participants, rounds, byes, standings, TRF bridge)
+- [ ] Persistence (PostgreSQL/Drizzle)
+- [ ] Tiebreaks (FIDE 2023 regulations subset used in Norway)
 - [ ] Berger (round robin) pairing tables
 - [ ] NSF Monrad pairing (rules requested from NSF)
-- [ ] Tiebreaks (FIDE 2023 regulations subset used in Norway)
 - [ ] Arbiter UI: registration, result entry, round management
 - [ ] Public pages: tournament page, standings, terminliste (calendar)
 - [ ] NSF ELO report generation (needs one sample report file)
