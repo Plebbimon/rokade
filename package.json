@@ -1,0 +1,25 @@
+{
+  "name": "rokade",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Open-source tournament administration for Norwegian chess (working title: Rokade)",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "dev": "npm run dev --workspace apps/web",
+    "build": "npm run build --workspace apps/web",
+    "fetch:bbppairings": "scripts/fetch-bbppairings.sh"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.0",
+    "vitest": "^3.0.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

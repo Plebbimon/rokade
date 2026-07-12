@@ -1,0 +1,14 @@
+{
+  "name": "@rokade/core",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "Framework-free domain core: tournament model, TRF parser/serializer, pairing-system abstractions",
+  "exports": {
+    ".": "./src/index.ts",
+    "./fixtures": "./src/trf/fixtures.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "name": "@rokade/pairing",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "Adapter around the bbpPairings engine (FIDE Dutch system)",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@rokade/core": "*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0"
+  }
+}
