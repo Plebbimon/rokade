@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Cache bbpPairings
+        uses: actions/cache@v4
+        with:
+          path: vendor/bbpPairings
+          key: bbppairings-${{ runner.os }}-${{ hashFiles('scripts/fetch-bbppairings.sh') }}
+
+      - name: Build bbpPairings
+        run: ./scripts/fetch-bbppairings.sh
+
+      - run: npm run typecheck
+
+      - run: npm test
+
+      - name: Build web app
+        run: npm run build

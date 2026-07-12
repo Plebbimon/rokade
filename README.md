@@ -1,5 +1,7 @@
 # ♜ Rokade
 
+[![CI](https://github.com/Plebbimon/rokade/actions/workflows/ci.yml/badge.svg)](https://github.com/Plebbimon/rokade/actions/workflows/ci.yml)
+
 **Fri og åpen programvare for sjakkturneringer i Norge.**
 
 Rokade is an open-source tournament administration platform for Norwegian chess:

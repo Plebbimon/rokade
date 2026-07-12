@@ -5,9 +5,11 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 DEST="$ROOT/vendor/bbpPairings"
+BBP_VERSION="${BBP_VERSION:-v6.0.0}"
 
 if [ ! -d "$DEST" ]; then
-  git clone --depth 1 https://github.com/BieremaBoyzProgramming/bbpPairings.git "$DEST"
+  git clone --depth 1 --branch "$BBP_VERSION" \
+    https://github.com/BieremaBoyzProgramming/bbpPairings.git "$DEST"
 fi
 
 # macOS's g++ is Clang, which rejects the Makefile's GCC-only warning flags,
