@@ -2,9 +2,27 @@ import { existsSync } from "node:fs";
 import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import type { StoredTournament, TournamentStore } from "@rokade/core";
-import { createPgTournamentStore } from "@rokade/db";
+import { createDb, PgTournamentStore, type Db } from "@rokade/db";
 
 export type { StoredTournament, TournamentStore } from "@rokade/core";
+
+let sharedDb: Db | undefined;
+
+/**
+ * Shared connection pool for everything Postgres-backed (tournaments, auth).
+ * Only call when DATABASE_URL is set; multi-user features are Postgres-only.
+ */
+export function db(): Db {
+  const url = process.env["DATABASE_URL"];
+  if (!url) throw new Error("DATABASE_URL er ikke satt – flerbrukermodus krever PostgreSQL");
+  sharedDb ??= createDb(url);
+  return sharedDb;
+}
+
+/** True when running against PostgreSQL (auth and orgs active). */
+export function isMultiUser(): boolean {
+  return Boolean(process.env["DATABASE_URL"]);
+}
 
 const ID_PATTERN = /^[a-z0-9-]+$/;
 
@@ -68,8 +86,8 @@ let defaultStore: TournamentStore | undefined;
  * dev); unset -> file store, so the app still runs with zero setup.
  */
 export function tournamentStore(): TournamentStore {
-  defaultStore ??= process.env["DATABASE_URL"]
-    ? createPgTournamentStore(process.env["DATABASE_URL"])
+  defaultStore ??= isMultiUser()
+    ? new PgTournamentStore(db())
     : new FileTournamentStore(
         process.env["ROKADE_DATA_DIR"] ?? path.join(findWorkspaceRoot(), ".data", "tournaments"),
       );

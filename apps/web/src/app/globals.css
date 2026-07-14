@@ -151,3 +151,20 @@ button {
 button:hover {
   background: color-mix(in srgb, var(--fg) 8%, transparent);
 }
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+}
+
+.userbox {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+}
+
+.error {
+  color: #b3261e;
+}

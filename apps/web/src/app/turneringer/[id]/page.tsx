@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { standings, type GameResult, type TiebreakKey } from "@rokade/core";
 import { addPlayerAction, pairNextRoundAction, setResultAction } from "@/lib/actions";
+import { requireUser } from "@/lib/auth";
 import { RESULT_LABEL, formatPoints } from "@/lib/format";
 import { allResultsRecorded } from "@/lib/service";
 import { tournamentStore } from "@/lib/store";
@@ -21,6 +22,7 @@ const SWISS_TIEBREAKS: TiebreakKey[] = ["buchholz", "buchholz-cut-1", "sonneborn
 const BERGER_TIEBREAKS: TiebreakKey[] = ["sonneborn-berger"];
 
 export default async function TournamentPage({ params }: { params: Promise<{ id: string }> }) {
+  await requireUser();
   const { id } = await params;
   const record = await tournamentStore().get(id);
   if (!record) notFound();

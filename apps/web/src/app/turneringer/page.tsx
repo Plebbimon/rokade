@@ -1,17 +1,25 @@
 import Link from "next/link";
 import { createTournamentAction } from "@/lib/actions";
+import { logoutAction } from "@/lib/auth-actions";
+import { requireUser } from "@/lib/auth";
 import { tournamentStore } from "@/lib/store";
 
 export const dynamic = "force-dynamic";
 
 export default async function Tournaments() {
+  const user = await requireUser();
   const records = await tournamentStore().list();
 
   return (
     <main>
-      <p>
+      <div className="topbar">
         <Link href="/">← Rokade</Link>
-      </p>
+        {user ? (
+          <form action={logoutAction} className="userbox">
+            <span className="muted">{user.email}</span> <button type="submit">Logg ut</button>
+          </form>
+        ) : null}
+      </div>
       <h1>Turneringer</h1>
 
       {records.length === 0 ? (

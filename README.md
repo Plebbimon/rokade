@@ -63,6 +63,11 @@ DATABASE_URL=postgres://rokade:rokade@localhost:5433/rokade npm run dev
 
 The same `DATABASE_URL` makes `npm test` include the PostgreSQL store tests.
 
+In PostgreSQL mode the arbiter UI sits behind passwordless login (e-mail
+magic link); in development the link is printed to the server console
+instead of being sent. File mode has no login — it is the local
+single-arbiter path.
+
 ## Roadmap
 
 - [x] TRF16 parse/serialize with golden-file round-trip tests
@@ -77,6 +82,8 @@ The same `DATABASE_URL` makes `npm test` include the PostgreSQL store tests.
       register players, set up rounds, enter results, live standings
 - [x] Persistence behind a `TournamentStore` interface: PostgreSQL/Drizzle when
       `DATABASE_URL` is set (Docker Compose for dev), JSON files in `.data/` otherwise
+- [x] Passwordless auth (e-mail magic link, hashed single-use tokens, sessions);
+      arbiter pages and actions gated in multi-user mode
 - [ ] NSF Monrad pairing (rules requested from NSF)
 - [ ] Public pages: tournament page, standings, terminliste (calendar)
 - [ ] NSF ELO report generation (needs one sample report file)

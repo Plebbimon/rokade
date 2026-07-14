@@ -2,10 +2,12 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { requireUser } from "./auth.js";
 import { addPlayer, createTournament, pairNextRound, setResult } from "./service.js";
 import { tournamentStore } from "./store.js";
 
 export async function createTournamentAction(formData: FormData): Promise<void> {
+  await requireUser();
   const id = await createTournament(tournamentStore(), {
     name: String(formData.get("name") ?? ""),
     format: String(formData.get("format") ?? ""),
@@ -17,6 +19,7 @@ export async function createTournamentAction(formData: FormData): Promise<void> 
 }
 
 export async function addPlayerAction(formData: FormData): Promise<void> {
+  await requireUser();
   const id = String(formData.get("tournamentId"));
   const ratingRaw = String(formData.get("rating") ?? "").trim();
   await addPlayer(tournamentStore(), id, {
@@ -27,12 +30,14 @@ export async function addPlayerAction(formData: FormData): Promise<void> {
 }
 
 export async function pairNextRoundAction(formData: FormData): Promise<void> {
+  await requireUser();
   const id = String(formData.get("tournamentId"));
   await pairNextRound(tournamentStore(), id);
   revalidatePath(`/turneringer/${id}`);
 }
 
 export async function setResultAction(formData: FormData): Promise<void> {
+  await requireUser();
   const id = String(formData.get("tournamentId"));
   await setResult(
     tournamentStore(),
