@@ -8,6 +8,22 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: rokade
+          POSTGRES_PASSWORD: rokade
+          POSTGRES_DB: rokade
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd "pg_isready -U rokade -d rokade"
+          --health-interval 2s
+          --health-timeout 2s
+          --health-retries 15
+    env:
+      DATABASE_URL: postgres://rokade:rokade@localhost:5433/rokade
     steps:
       - uses: actions/checkout@v4
 
@@ -28,6 +44,9 @@ jobs:
         run: ./scripts/fetch-bbppairings.sh
 
       - run: npm run typecheck
+
+      - name: Apply database migrations
+        run: npm run db:migrate
 
       - run: npm test
 

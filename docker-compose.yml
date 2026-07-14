@@ -1,0 +1,20 @@
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: rokade
+      POSTGRES_PASSWORD: rokade
+      POSTGRES_DB: rokade
+    ports:
+      # 5433 on the host: many dev machines already run a Postgres on 5432.
+      - "5433:5432"
+    volumes:
+      - rokade-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U rokade -d rokade"]
+      interval: 2s
+      timeout: 2s
+      retries: 15
+
+volumes:
+  rokade-pgdata:

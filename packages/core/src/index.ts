@@ -20,6 +20,7 @@ export type {
   Tournament,
 } from "./model/types.js";
 export { addRound, recordResult } from "./model/tournament.js";
+export type { StoredTournament, TournamentStore } from "./model/store.js";
 export {
   playerPoints,
   standings,

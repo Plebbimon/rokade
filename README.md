@@ -21,6 +21,7 @@ package with zero framework dependencies, so it outlives any web-framework churn
 packages/core      Domain: tournament model, TRF16 parser/serializer,
                    Berger round robin, (soon) NSF Monrad, tiebreaks, NSF ELO reports
 packages/pairing   Thin adapter around the bbpPairings binary (FIDE Dutch system)
+packages/db        PostgreSQL persistence via Drizzle: schema, migrations, stores
 apps/web           Next.js: public tournament pages + arbiter UI (skeleton)
 ```
 
@@ -33,7 +34,7 @@ Key decisions:
   submission). They start as stubs/CSV fixtures and become real adapters when
   NSF API access lands — nothing else changes.
 - **Golden-file tests**: real TRF files in, expected output byte-for-byte out.
-- **Self-hostable**: plain Node + PostgreSQL (planned), Docker Compose, no cloud lock-in.
+- **Self-hostable**: plain Node + PostgreSQL, Docker Compose, no cloud lock-in.
 
 ## Getting started
 
@@ -49,6 +50,19 @@ npm test
 npm run dev           # web app on http://localhost:3000
 ```
 
+Without further setup the app persists to JSON files in `.data/` — fine for
+trying it out. For the real (multi-user) setup, run PostgreSQL and point the
+app at it:
+
+```sh
+docker compose up -d  # PostgreSQL 17 on localhost:5433
+npm run db:migrate    # apply schema migrations
+
+DATABASE_URL=postgres://rokade:rokade@localhost:5433/rokade npm run dev
+```
+
+The same `DATABASE_URL` makes `npm test` include the PostgreSQL store tests.
+
 ## Roadmap
 
 - [x] TRF16 parse/serialize with golden-file round-trip tests
@@ -61,8 +75,8 @@ npm run dev           # web app on http://localhost:3000
 - [x] Demo page: standings with tiebreak columns rendered from the domain model (`/demo`)
 - [x] Arbiter UI, first slice (`/turneringer`): create tournament (Swiss/Berger),
       register players, set up rounds, enter results, live standings
-- [x] Persistence behind a `TournamentStore` interface (JSON files in `.data/`
-      for now; PostgreSQL/Drizzle later without touching service or UI)
+- [x] Persistence behind a `TournamentStore` interface: PostgreSQL/Drizzle when
+      `DATABASE_URL` is set (Docker Compose for dev), JSON files in `.data/` otherwise
 - [ ] NSF Monrad pairing (rules requested from NSF)
 - [ ] Public pages: tournament page, standings, terminliste (calendar)
 - [ ] NSF ELO report generation (needs one sample report file)

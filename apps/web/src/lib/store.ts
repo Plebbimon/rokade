@@ -1,24 +1,10 @@
 import { existsSync } from "node:fs";
 import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
-import type { Tournament } from "@rokade/core";
+import type { StoredTournament, TournamentStore } from "@rokade/core";
+import { createPgTournamentStore } from "@rokade/db";
 
-export interface StoredTournament {
-  id: string;
-  createdAt: string;
-  tournament: Tournament;
-}
-
-/**
- * Persistence boundary for tournaments. The file implementation below is for
- * local, single-arbiter use; a PostgreSQL implementation replaces it behind
- * the same interface without touching the service layer or UI.
- */
-export interface TournamentStore {
-  list(): Promise<StoredTournament[]>;
-  get(id: string): Promise<StoredTournament | null>;
-  save(record: StoredTournament): Promise<void>;
-}
+export type { StoredTournament, TournamentStore } from "@rokade/core";
 
 const ID_PATTERN = /^[a-z0-9-]+$/;
 
@@ -77,10 +63,16 @@ export function findWorkspaceRoot(from = process.cwd()): string {
 
 let defaultStore: TournamentStore | undefined;
 
+/**
+ * DATABASE_URL set -> PostgreSQL (the multi-user path, Docker Compose in
+ * dev); unset -> file store, so the app still runs with zero setup.
+ */
 export function tournamentStore(): TournamentStore {
-  defaultStore ??= new FileTournamentStore(
-    process.env["ROKADE_DATA_DIR"] ?? path.join(findWorkspaceRoot(), ".data", "tournaments"),
-  );
+  defaultStore ??= process.env["DATABASE_URL"]
+    ? createPgTournamentStore(process.env["DATABASE_URL"])
+    : new FileTournamentStore(
+        process.env["ROKADE_DATA_DIR"] ?? path.join(findWorkspaceRoot(), ".data", "tournaments"),
+      );
   return defaultStore;
 }
 

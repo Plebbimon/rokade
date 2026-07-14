@@ -1,0 +1,25 @@
+{
+  "name": "@rokade/db",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "PostgreSQL persistence via Drizzle: schema, migrations, TournamentStore implementation",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "generate": "drizzle-kit generate",
+    "migrate": "drizzle-kit migrate"
+  },
+  "dependencies": {
+    "@rokade/core": "*",
+    "drizzle-orm": "^0.44.0",
+    "pg": "^8.16.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/pg": "^8.15.0",
+    "drizzle-kit": "^0.31.0"
+  }
+}

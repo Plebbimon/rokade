@@ -13,7 +13,9 @@
     "typecheck": "npm run typecheck --workspaces --if-present",
     "dev": "npm run dev --workspace apps/web",
     "build": "npm run build --workspace apps/web",
-    "fetch:bbppairings": "scripts/fetch-bbppairings.sh"
+    "fetch:bbppairings": "scripts/fetch-bbppairings.sh",
+    "db:generate": "npm run generate --workspace packages/db",
+    "db:migrate": "npm run migrate --workspace packages/db"
   },
   "devDependencies": {
     "typescript": "^5.5.0",
