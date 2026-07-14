@@ -27,6 +27,8 @@ export interface CreateTournamentInput {
   format: string;
   totalRounds: number;
   city?: string;
+  /** Owning club; null in local file mode. */
+  clubId?: string | null;
 }
 
 export async function createTournament(
@@ -46,6 +48,7 @@ export async function createTournament(
   const record: StoredTournament = {
     id: randomUUID(),
     createdAt: new Date().toISOString(),
+    clubId: input.clubId ?? null,
     tournament: {
       name,
       format,

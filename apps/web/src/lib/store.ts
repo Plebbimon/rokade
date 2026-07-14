@@ -34,7 +34,14 @@ export class FileTournamentStore implements TournamentStore {
     return path.join(this.dir, `${id}.json`);
   }
 
-  async list(): Promise<StoredTournament[]> {
+  private parse(raw: string): StoredTournament {
+    const record = JSON.parse(raw) as StoredTournament;
+    // Files written before club ownership existed lack the field.
+    record.clubId ??= null;
+    return record;
+  }
+
+  async list(clubIds?: string[]): Promise<StoredTournament[]> {
     let names: string[];
     try {
       names = await readdir(this.dir);
@@ -44,18 +51,17 @@ export class FileTournamentStore implements TournamentStore {
     const records = await Promise.all(
       names
         .filter((name) => name.endsWith(".json"))
-        .map(async (name) => {
-          const raw = await readFile(path.join(this.dir, name), "utf8");
-          return JSON.parse(raw) as StoredTournament;
-        }),
+        .map(async (name) => this.parse(await readFile(path.join(this.dir, name), "utf8"))),
     );
-    return records.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+    return records
+      .filter((r) => !clubIds || (r.clubId !== null && clubIds.includes(r.clubId)))
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   }
 
   async get(id: string): Promise<StoredTournament | null> {
     const file = this.file(id);
     try {
-      return JSON.parse(await readFile(file, "utf8")) as StoredTournament;
+      return this.parse(await readFile(file, "utf8"));
     } catch {
       return null;
     }

@@ -102,8 +102,14 @@ Foundation is built, tested (46 tests), and green in CI at
 **NSF engagement (respectfully, via the general secretary's office).**
 First asks package — framed as "help us document how the current flow works":
 
-1. NSF Monrad pairing rules (documented, available on request)
+1. NSF Monrad pairing rules (TS6's help pages say Norwegian Monrad "is
+   described in the Norwegian handbook" — check NSF's public handbook first;
+   the ask may only be confirmation we read it right. TS6 also offers a
+   "Konrad" variant allowing rematches, popular for casual club evenings)
 2. One sample NSF ELO report file from a recently rated tournament
+   (TS6's help pages state NSF accepts the TS6 TRX file itself as the
+   rating/Grand Prix report — so the TRX format may BE the report format,
+   making ask #4 doubly important)
 3. One sample NGP/quality calculation
 4. One TS6 XML export of an NSF-owned tournament (the format is documented for
    third-party integration; enables a migration/import story)
@@ -190,7 +196,9 @@ Engine, domain, tiebreaks, Berger, arbiter CRUD, CI. See §5.
 ## 9. Open questions
 
 - Hosting: who operates the NSF instance (NSF office? volunteer ops? paid VPS)?
-- Signup without login: spam/abuse protection for public påmelding (rate limits, email confirm?)
+- Signup without login: spam/abuse protection for public påmelding — TS6
+  answers this with an optional e-mail confirmation loop on signup; adopt the
+  same (plus rate limits)
 - USF (youth federation) — same instance or later integration?
 - Name: "Rokade" is a working title; check feelings at NSF before it sticks.
 - Team tournaments: when do they enter the roadmap?

@@ -7,6 +7,7 @@ export interface AuthUser {
   id: string;
   email: string;
   name: string | null;
+  nsfAdmin: boolean;
 }
 
 const LOGIN_TOKEN_TTL_MS = 15 * 60 * 1000;
@@ -74,7 +75,7 @@ export async function consumeLoginToken(
     .returning();
   const user = inserted[0];
   if (!user) throw new Error(`kunne ikke opprette bruker for ${email}`);
-  return { id: user.id, email: user.email, name: user.name };
+  return { id: user.id, email: user.email, name: user.name, nsfAdmin: user.nsfAdmin };
 }
 
 /** Start a session for the user. Returns the raw token for the cookie. */
@@ -91,7 +92,7 @@ export async function createSession(db: NodePgDatabase, userId: string): Promise
 /** Resolve a session cookie to its user; null when missing or expired. */
 export async function sessionUser(db: NodePgDatabase, token: string): Promise<AuthUser | null> {
   const rows = await db
-    .select({ id: users.id, email: users.email, name: users.name })
+    .select({ id: users.id, email: users.email, name: users.name, nsfAdmin: users.nsfAdmin })
     .from(sessions)
     .innerJoin(users, eq(sessions.userId, users.id))
     .where(and(eq(sessions.tokenHash, hashToken(token)), gt(sessions.expiresAt, new Date())))

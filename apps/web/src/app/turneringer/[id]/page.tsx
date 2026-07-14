@@ -5,7 +5,7 @@ import { addPlayerAction, pairNextRoundAction, setResultAction } from "@/lib/act
 import { requireUser } from "@/lib/auth";
 import { RESULT_LABEL, formatPoints } from "@/lib/format";
 import { allResultsRecorded } from "@/lib/service";
-import { tournamentStore } from "@/lib/store";
+import { accessibleTournament } from "@/lib/access";
 
 export const dynamic = "force-dynamic";
 
@@ -24,7 +24,7 @@ const BERGER_TIEBREAKS: TiebreakKey[] = ["sonneborn-berger"];
 export default async function TournamentPage({ params }: { params: Promise<{ id: string }> }) {
   await requireUser();
   const { id } = await params;
-  const record = await tournamentStore().get(id);
+  const record = await accessibleTournament(id);
   if (!record) notFound();
 
   const t = record.tournament;

@@ -1,5 +1,5 @@
 import type { Tournament } from "@rokade/core";
-import { jsonb, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { boolean, jsonb, pgTable, primaryKey, text, timestamp, uuid } from "drizzle-orm/pg-core";
 
 /**
  * One row per tournament, with the domain aggregate stored as jsonb — the
@@ -11,7 +11,42 @@ export const tournaments = pgTable("tournaments", {
   id: uuid("id").primaryKey(),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull(),
   tournament: jsonb("tournament").$type<Tournament>().notNull(),
+  // Owning club. Null only for rows from before clubs existed (and in the
+  // file store, which has no clubs); new tournaments always carry one.
+  clubId: uuid("club_id").references(() => clubs.id),
 });
+
+/**
+ * The tenant: one club = one organization, mirroring how TS6 licenses map
+ * to clubs. Tournaments belong to a club; members administer them.
+ */
+export const clubs = pgTable("clubs", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: text("name").notNull().unique(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export type ClubRole = "admin" | "arbiter";
+
+/**
+ * Club membership. "admin" manages the club (members, settings); "arbiter"
+ * runs tournaments. Every admin can also do everything an arbiter can.
+ * NSF-level oversight is not a membership: see users.nsfAdmin.
+ */
+export const memberships = pgTable(
+  "memberships",
+  {
+    clubId: uuid("club_id")
+      .notNull()
+      .references(() => clubs.id, { onDelete: "cascade" }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    role: text("role").$type<ClubRole>().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [primaryKey({ columns: [table.clubId, table.userId] })],
+);
 
 /**
  * Passwordless auth: a user is just a verified email address. Accounts are
@@ -22,6 +57,9 @@ export const users = pgTable("users", {
   // Stored lower-cased; the application normalizes before every query.
   email: text("email").notNull().unique(),
   name: text("name"),
+  // Federation-level oversight (NSF office): sees and administers every
+  // club and tournament. Set manually in the database, never via the UI.
+  nsfAdmin: boolean("nsf_admin").notNull().default(false),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

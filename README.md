@@ -84,6 +84,8 @@ single-arbiter path.
       `DATABASE_URL` is set (Docker Compose for dev), JSON files in `.data/` otherwise
 - [x] Passwordless auth (e-mail magic link, hashed single-use tokens, sessions);
       arbiter pages and actions gated in multi-user mode
+- [x] Clubs as organizations: membership roles (admin/turneringsleder), invite by
+      e-mail, club-owned tournaments — clubs never see each other's admin pages
 - [ ] NSF Monrad pairing (rules requested from NSF)
 - [ ] Public pages: tournament page, standings, terminliste (calendar)
 - [ ] NSF ELO report generation (needs one sample report file)

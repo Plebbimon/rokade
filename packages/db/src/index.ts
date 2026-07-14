@@ -1,5 +1,16 @@
 export { createDb, type Db } from "./client.js";
-export { loginTokens, sessions, tournaments, users } from "./schema.js";
+export { clubs, loginTokens, memberships, sessions, tournaments, users } from "./schema.js";
+export type { ClubRole } from "./schema.js";
+export {
+  addMemberByEmail,
+  allClubs,
+  clubMembers,
+  createClub,
+  membershipRole,
+  userClubs,
+  type ClubMember,
+  type ClubWithRole,
+} from "./clubs.js";
 export {
   PgTournamentStore,
   connectPgTournamentStore,

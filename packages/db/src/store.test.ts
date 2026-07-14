@@ -13,6 +13,7 @@ function record(name: string, createdAt: string): StoredTournament {
   return {
     id: randomUUID(),
     createdAt,
+    clubId: null,
     tournament: { name, format: "fide-swiss", totalRounds: 5, players: [], rounds: [] },
   };
 }

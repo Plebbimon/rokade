@@ -1,5 +1,5 @@
 import type { StoredTournament, TournamentStore } from "@rokade/core";
-import { desc, eq } from "drizzle-orm";
+import { desc, eq, inArray } from "drizzle-orm";
 import { drizzle, type NodePgDatabase } from "drizzle-orm/node-postgres";
 import pg from "pg";
 import { tournaments } from "./schema.js";
@@ -9,14 +9,24 @@ const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{
 type Row = typeof tournaments.$inferSelect;
 
 function toRecord(row: Row): StoredTournament {
-  return { id: row.id, createdAt: row.createdAt.toISOString(), tournament: row.tournament };
+  return {
+    id: row.id,
+    createdAt: row.createdAt.toISOString(),
+    clubId: row.clubId,
+    tournament: row.tournament,
+  };
 }
 
 export class PgTournamentStore implements TournamentStore {
   constructor(private readonly db: NodePgDatabase) {}
 
-  async list(): Promise<StoredTournament[]> {
-    const rows = await this.db.select().from(tournaments).orderBy(desc(tournaments.createdAt));
+  async list(clubIds?: string[]): Promise<StoredTournament[]> {
+    if (clubIds && clubIds.length === 0) return [];
+    const rows = await this.db
+      .select()
+      .from(tournaments)
+      .where(clubIds ? inArray(tournaments.clubId, clubIds) : undefined)
+      .orderBy(desc(tournaments.createdAt));
     return rows.map(toRecord);
   }
 
@@ -30,6 +40,7 @@ export class PgTournamentStore implements TournamentStore {
     const row = {
       id: record.id,
       createdAt: new Date(record.createdAt),
+      clubId: record.clubId,
       tournament: record.tournament,
     };
     await this.db
