@@ -1,0 +1,16 @@
+{
+  "name": "@rokade/registry",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "Member-registry boundary: player lookup against rating lists (CSV stub now, NSF public list later)",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0"
+  }
+}

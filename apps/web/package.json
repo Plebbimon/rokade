@@ -12,6 +12,7 @@
     "@rokade/core": "*",
     "@rokade/db": "*",
     "@rokade/pairing": "*",
+    "@rokade/registry": "*",
     "next": "^15.3.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
