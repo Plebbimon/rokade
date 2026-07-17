@@ -1,6 +1,13 @@
 export { createDb, type Db } from "./client.js";
-export { clubs, loginTokens, memberships, sessions, tournaments, users } from "./schema.js";
-export type { ClubRole } from "./schema.js";
+export { auditLog, clubs, loginTokens, memberships, sessions, tournaments, users } from "./schema.js";
+export type { AuditAction, ClubRole } from "./schema.js";
+export {
+  clubAuditTrail,
+  recordAudit,
+  tournamentAuditTrail,
+  type AuditEntry,
+  type RecordAuditInput,
+} from "./audit.js";
 export {
   addMemberByEmail,
   allClubs,

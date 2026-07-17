@@ -83,9 +83,10 @@ Cross-cutting: multiple groups/classes per tournament (A/B/C is standard even
 at club level), Norwegian-first UI with English second, accessibility on
 public pages.
 
-## 5. Current state (2026-07-13)
+## 5. Current state (2026-07-17)
 
-Foundation is built, tested (46 tests), and green in CI at
+Foundation and the multi-user core are built, tested (61 tests, the
+database ones against real PostgreSQL), and green in CI at
 [github.com/Plebbimon/rokade](https://github.com/Plebbimon/rokade):
 
 - TRF16 parser/serializer (byte-exact golden tests)
@@ -95,7 +96,13 @@ Foundation is built, tested (46 tests), and green in CI at
 - Tiebreaks per FIDE C.07 (2023): Buchholz, BH cut-1, Sonneborn-Berger,
   incl. Article 16 unplayed-round rules
 - First arbiter UI: create tournament, register players, pair, record, standings
-- Storage behind a `TournamentStore` interface (JSON files now, Postgres later)
+- Storage behind a `TournamentStore` interface: JSON files for zero-setup local
+  use, PostgreSQL (Drizzle) for the multi-user service
+- Passwordless auth (e-mail magic links), clubs as tenants with admin/arbiter
+  roles, NSF super-admin, club-scoped tournament access enforced in every
+  server action
+- Append-only audit log of arbiter and club-admin actions, shown on the
+  tournament page and per club
 
 ## 6. Strategy
 
@@ -140,7 +147,7 @@ changes how the project *demos* to NSF.
 **Phase 0 — Foundation ✅ (done)**
 Engine, domain, tiebreaks, Berger, arbiter CRUD, CI. See §5.
 
-**Phase 1 — Multi-user core**
+**Phase 1 — Multi-user core ✅ (done)**
 1. PostgreSQL + Drizzle behind `TournamentStore` (Docker Compose for dev)
 2. Auth (email magic-link or passkeys; no passwords to leak)
 3. Clubs as organizations; roles: club admin, arbiter, NSF admin

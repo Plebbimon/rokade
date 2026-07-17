@@ -1,15 +1,30 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { clubMembers, userClubs, type ClubMember, type ClubWithRole } from "@rokade/db";
+import {
+  clubAuditTrail,
+  clubMembers,
+  userClubs,
+  type AuditEntry,
+  type ClubMember,
+  type ClubWithRole,
+} from "@rokade/db";
+import { AuditTable } from "@/components/audit-trail";
 import { requireUser } from "@/lib/auth";
 import { addMemberAction, createClubAction } from "@/lib/club-actions";
+import { ROLE_LABEL } from "@/lib/format";
 import { db, isMultiUser } from "@/lib/store";
 
 export const dynamic = "force-dynamic";
 
-const ROLE_LABEL: Record<string, string> = { admin: "administrator", arbiter: "turneringsleder" };
-
-function MemberList({ club, members }: { club: ClubWithRole; members: ClubMember[] }) {
+function MemberList({
+  club,
+  members,
+  trail,
+}: {
+  club: ClubWithRole;
+  members: ClubMember[];
+  trail: AuditEntry[];
+}) {
   return (
     <section>
       <h2>
@@ -33,6 +48,12 @@ function MemberList({ club, members }: { club: ClubWithRole; members: ClubMember
           <button type="submit">Legg til medlem</button>
         </form>
       ) : null}
+      {trail.length > 0 && (
+        <>
+          <h3>Logg</h3>
+          <AuditTable entries={trail} />
+        </>
+      )}
     </section>
   );
 }
@@ -42,6 +63,7 @@ export default async function ClubsPage() {
   const user = (await requireUser())!;
   const clubs = await userClubs(db(), user.id);
   const members = await Promise.all(clubs.map((club) => clubMembers(db(), club.id)));
+  const trails = await Promise.all(clubs.map((club) => clubAuditTrail(db(), club.id)));
 
   return (
     <main>
@@ -56,7 +78,9 @@ export default async function ClubsPage() {
           administrator legge deg til med e-postadressen din.
         </p>
       ) : (
-        clubs.map((club, i) => <MemberList key={club.id} club={club} members={members[i]!} />)
+        clubs.map((club, i) => (
+          <MemberList key={club.id} club={club} members={members[i]!} trail={trails[i]!} />
+        ))
       )}
 
       <h2>Ny klubb</h2>

@@ -1,11 +1,14 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { standings, type GameResult, type TiebreakKey } from "@rokade/core";
+import { tournamentAuditTrail } from "@rokade/db";
+import { AuditTable } from "@/components/audit-trail";
 import { addPlayerAction, pairNextRoundAction, setResultAction } from "@/lib/actions";
 import { requireUser } from "@/lib/auth";
 import { RESULT_LABEL, formatPoints } from "@/lib/format";
 import { allResultsRecorded } from "@/lib/service";
 import { accessibleTournament } from "@/lib/access";
+import { db, isMultiUser } from "@/lib/store";
 
 export const dynamic = "force-dynamic";
 
@@ -33,6 +36,7 @@ export default async function TournamentPage({ params }: { params: Promise<{ id:
   const table = standings(t, { tiebreaks });
   const complete = allResultsRecorded(t);
   const finished = t.totalRounds > 0 && t.rounds.length >= t.totalRounds;
+  const trail = isMultiUser() ? await tournamentAuditTrail(db(), id) : [];
 
   return (
     <main>
@@ -167,6 +171,13 @@ export default async function TournamentPage({ params }: { params: Promise<{ id:
           <p className="muted">Registrer alle resultatene før neste runde kan settes opp.</p>
         ))}
       {finished && complete && <p className="lead">Turneringen er ferdigspilt.</p>}
+
+      {trail.length > 0 && (
+        <section>
+          <h2>Logg</h2>
+          <AuditTable entries={trail} />
+        </section>
+      )}
     </main>
   );
 }

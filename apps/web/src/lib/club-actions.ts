@@ -1,14 +1,23 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { createClub, addMemberByEmail, membershipRole, type ClubRole } from "@rokade/db";
+import {
+  createClub,
+  addMemberByEmail,
+  membershipRole,
+  normalizeEmail,
+  type ClubRole,
+} from "@rokade/db";
+import { audit } from "./audit.js";
 import { requireUser } from "./auth.js";
 import { db } from "./store.js";
 
 export async function createClubAction(formData: FormData): Promise<void> {
   const user = await requireUser();
   if (!user) throw new Error("klubber finnes bare i flerbrukermodus");
-  await createClub(db(), String(formData.get("name") ?? ""), user.id);
+  const name = String(formData.get("name") ?? "").trim();
+  const clubId = await createClub(db(), name, user.id);
+  await audit(user, "club.create", { clubId, details: { name } });
   revalidatePath("/klubber");
 }
 
@@ -23,6 +32,8 @@ export async function addMemberAction(formData: FormData): Promise<void> {
     throw new Error("bare klubbens administrator kan legge til medlemmer");
   }
 
-  await addMemberByEmail(db(), clubId, String(formData.get("email") ?? ""), role as ClubRole);
+  const email = normalizeEmail(String(formData.get("email") ?? ""));
+  await addMemberByEmail(db(), clubId, email, role as ClubRole);
+  await audit(user, "member.add", { clubId, details: { email, role } });
   revalidatePath("/klubber");
 }

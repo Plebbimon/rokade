@@ -1,5 +1,14 @@
 import type { Tournament } from "@rokade/core";
-import { boolean, jsonb, pgTable, primaryKey, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import {
+  boolean,
+  index,
+  jsonb,
+  pgTable,
+  primaryKey,
+  text,
+  timestamp,
+  uuid,
+} from "drizzle-orm/pg-core";
 
 /**
  * One row per tournament, with the domain aggregate stored as jsonb — the
@@ -75,6 +84,38 @@ export const loginTokens = pgTable("login_tokens", {
   consumedAt: timestamp("consumed_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
+
+/**
+ * Append-only record of arbiter/admin actions. Deliberately without foreign
+ * keys: an audit entry must outlive whatever it describes, so actors are
+ * snapshotted by e-mail and club/tournament are plain ids. Only successful
+ * mutations are recorded (rejected requests never reach the log).
+ */
+export const auditLog = pgTable(
+  "audit_log",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    at: timestamp("at", { withTimezone: true }).notNull().defaultNow(),
+    userId: uuid("user_id").notNull(),
+    userEmail: text("user_email").notNull(),
+    clubId: uuid("club_id"),
+    tournamentId: uuid("tournament_id"),
+    action: text("action").$type<AuditAction>().notNull(),
+    details: jsonb("details").$type<Record<string, unknown>>().notNull().default({}),
+  },
+  (table) => [
+    index("audit_log_tournament_idx").on(table.tournamentId, table.at),
+    index("audit_log_club_idx").on(table.clubId, table.at),
+  ],
+);
+
+export type AuditAction =
+  | "tournament.create"
+  | "player.add"
+  | "round.pair"
+  | "result.set"
+  | "club.create"
+  | "member.add";
 
 /** Browser sessions; the cookie holds the raw token, the row its SHA-256. */
 export const sessions = pgTable("sessions", {
