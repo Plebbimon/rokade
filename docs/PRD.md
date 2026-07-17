@@ -168,9 +168,14 @@ Engine, domain, tiebreaks, Berger, arbiter CRUD, CI. See §5.
 
 **Phase 3 — Påmelding & member registry**
 1. `MemberRegistry` interface + CSV/fixture stub implementation
-2. Public signup form with lookup, class selection, organizer approval queue
+   (shaped by TS6's rating-list integration: prefix + substring search,
+   candidates carry rating/club/federation/ids — see docs/ts6-notes.md)
+2. Public signup form with lookup, signup deadline, e-mail confirmation
+   (TS6's anti-spam answer), and an organizer approval queue
 3. Dues/membership flagging surfaced to the organizer
-4. Swap-in real NSF API adapter when access lands
+4. Real adapter: NSF's *public rating list* first (no API needed — TS6
+   validates signups against public lists); NSF registry API later for
+   dues/membership status
    *Done when: signup→startlist requires no manual transcription.*
 
 **Phase 4 — Venue tooling**
