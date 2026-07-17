@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { standings, type GameResult, type TiebreakKey } from "@rokade/core";
 import { tournamentAuditTrail } from "@rokade/db";
 import { AuditTable } from "@/components/audit-trail";
+import { LiveRefresh } from "@/components/live-refresh";
 import {
   addPlayerAction,
   pairNextRoundAction,
@@ -64,6 +65,7 @@ export default async function TournamentPage({ params }: { params: Promise<{ id:
 
   return (
     <main>
+      {!canAdmin && <LiveRefresh tournamentId={id} />}
       <p>
         <Link href={canAdmin ? "/turneringer" : "/terminliste"}>
           ← {canAdmin ? "Turneringer" : "Terminliste"}

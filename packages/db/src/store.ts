@@ -37,6 +37,16 @@ export class PgTournamentStore implements TournamentStore {
     return rows[0] ? toRecord(rows[0]) : null;
   }
 
+  async lastModified(id: string): Promise<string | null> {
+    if (!UUID_PATTERN.test(id)) return null;
+    const rows = await this.db
+      .select({ updatedAt: tournaments.updatedAt })
+      .from(tournaments)
+      .where(eq(tournaments.id, id))
+      .limit(1);
+    return rows[0]?.updatedAt.toISOString() ?? null;
+  }
+
   async save(record: StoredTournament): Promise<void> {
     const row = {
       id: record.id,

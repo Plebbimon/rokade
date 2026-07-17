@@ -1,5 +1,5 @@
 import { existsSync } from "node:fs";
-import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readdir, readFile, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 import type { StoredTournament, TournamentStore } from "@rokade/core";
 import { createDb, PgTournamentStore, type Db } from "@rokade/db";
@@ -71,6 +71,14 @@ export class FileTournamentStore implements TournamentStore {
   async save(record: StoredTournament): Promise<void> {
     await mkdir(this.dir, { recursive: true });
     await writeFile(this.file(record.id), JSON.stringify(record, null, 2) + "\n", "utf8");
+  }
+
+  async lastModified(id: string): Promise<string | null> {
+    try {
+      return (await stat(this.file(id))).mtime.toISOString();
+    } catch {
+      return null;
+    }
   }
 }
 

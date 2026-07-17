@@ -29,4 +29,10 @@ export interface TournamentStore {
   list(clubIds?: string[]): Promise<StoredTournament[]>;
   get(id: string): Promise<StoredTournament | null>;
   save(record: StoredTournament): Promise<void>;
+  /**
+   * Opaque change marker for a tournament (bumped on every save), or null
+   * when it does not exist. Lets live pages poll for changes without
+   * loading the whole record.
+   */
+  lastModified(id: string): Promise<string | null>;
 }
