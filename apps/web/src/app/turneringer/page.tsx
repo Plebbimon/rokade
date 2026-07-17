@@ -22,15 +22,7 @@ export default async function Tournaments() {
   return (
     <main>
       <div className="topbar">
-        <span>
-          <Link href="/">← Rokade</Link> · <Link href="/terminliste">Terminliste</Link>
-          {user ? (
-            <>
-              {" "}
-              · <Link href="/klubber">Klubber</Link>
-            </>
-          ) : null}
-        </span>
+        <span>{user ? <Link href="/klubber">Klubber</Link> : null}</span>
         {user ? (
           <form action={logoutAction} className="userbox">
             <span className="muted">{user.email}</span> <button type="submit">Logg ut</button>
@@ -46,8 +38,12 @@ export default async function Tournaments() {
           {records.map((record) => (
             <li key={record.id}>
               <Link href={`/turneringer/${record.id}`}>{record.tournament.name}</Link>{" "}
+              {isMultiUser() && record.publishedAt === null ? (
+                <>
+                  <span className="badge">Utkast</span>{" "}
+                </>
+              ) : null}
               <span className="muted">
-                {isMultiUser() && record.publishedAt === null ? "Utkast · " : ""}
                 {record.clubId && clubName.has(record.clubId)
                   ? `${clubName.get(record.clubId)} · `
                   : ""}

@@ -68,7 +68,7 @@ export default async function ClubsPage() {
   return (
     <main>
       <p>
-        <Link href="/turneringer">← Turneringer</Link>
+        <Link href="/turneringer">← Mine turneringer</Link>
       </p>
       <h1>Klubber</h1>
 

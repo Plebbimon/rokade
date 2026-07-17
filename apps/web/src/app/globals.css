@@ -1,15 +1,32 @@
+/*
+ * Rokade — "the tournament bulletin".
+ * Palette from the venue: green vinyl boards, printer-paper wall lists,
+ * ink, and the red flag of an analog clock (reserved for live + errors).
+ * Type: IBM Plex — condensed caps for the wall-list voice, mono for
+ * tables like the typewritten bulletins.
+ */
+
 :root {
   color-scheme: light dark;
-  --fg: #1a1a1a;
-  --bg: #ffffff;
-  --muted: #666;
+  --paper: #fbfaf7;
+  --ink: #1b1f1d;
+  --muted: #67706b;
+  --board: #2d6a4f;
+  --board-deep: #1e4d38;
+  --tint: #eaf0eb;
+  --flag: #c5372c;
+  --line: color-mix(in srgb, var(--ink) 16%, transparent);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --fg: #ededed;
-    --bg: #121212;
-    --muted: #999;
+    --paper: #141816;
+    --ink: #e8eae7;
+    --muted: #97a09a;
+    --board: #6fae8f;
+    --board-deep: #8fc3a8;
+    --tint: #1c2420;
+    --flag: #e0655a;
   }
 }
 
@@ -20,26 +37,138 @@
 }
 
 body {
-  font-family: system-ui, -apple-system, sans-serif;
-  color: var(--fg);
-  background: var(--bg);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  color: var(--ink);
+  background: var(--paper);
   line-height: 1.6;
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
 }
 
 main {
-  max-width: 42rem;
+  width: 100%;
+  max-width: 46rem;
   margin: 0 auto;
-  padding: 4rem 1.5rem;
+  padding: 2.5rem 1.25rem 4rem;
+  flex: 1;
 }
 
+/* ---- chrome ---- */
+
+.site-header {
+  background: var(--board);
+  color: #fff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.55rem 1.25rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  .site-header {
+    /* Keep the board-green band present in the dark theme too. */
+    background: #1d4433;
+    color: #e2ece6;
+  }
+}
+
+.site-header a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.site-header nav {
+  display: flex;
+  gap: 1.1rem;
+  font-size: 0.9rem;
+}
+
+.site-header nav a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.brand-mark {
+  font-family: var(--font-mono), monospace;
+  font-weight: 600;
+  font-size: 0.85rem;
+  border: 1px solid color-mix(in srgb, currentColor 55%, transparent);
+  border-radius: 3px;
+  padding: 0 0.3rem;
+}
+
+.brand-name {
+  font-family: var(--font-condensed), var(--font-sans), sans-serif;
+  font-weight: 700;
+  font-size: 1.05rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.site-footer {
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 0.8rem;
+  text-align: center;
+  padding: 1rem 1.25rem 1.5rem;
+}
+
+.site-footer a {
+  color: inherit;
+}
+
+/* ---- type ---- */
+
 h1 {
-  font-size: 2rem;
+  font-family: var(--font-condensed), var(--font-sans), sans-serif;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  font-size: 2.1rem;
+  line-height: 1.15;
   margin-bottom: 0.5rem;
+}
+
+h2 {
+  font-family: var(--font-condensed), var(--font-sans), sans-serif;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.95rem;
+  margin: 2.25rem 0 0.75rem;
+}
+
+h3 {
+  font-family: var(--font-condensed), var(--font-sans), sans-serif;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin: 1.5rem 0 0.5rem;
 }
 
 p.lead {
   color: var(--muted);
   margin-bottom: 2rem;
+  max-width: 38rem;
+}
+
+a {
+  color: var(--board);
+  text-underline-offset: 3px;
+}
+
+a:hover {
+  color: var(--board-deep);
 }
 
 ul {
@@ -50,18 +179,20 @@ li {
   margin-bottom: 0.5rem;
 }
 
-h2 {
-  font-size: 1.25rem;
-  margin: 2rem 0 0.75rem;
+ul.plain {
+  list-style: none;
+  padding: 0;
 }
 
-p.cta {
-  margin-top: 2rem;
+.muted {
+  color: var(--muted);
 }
 
-a {
-  color: inherit;
+.error {
+  color: var(--flag);
 }
+
+/* ---- the bulletin: tables ---- */
 
 .table-wrap {
   overflow-x: auto;
@@ -70,20 +201,30 @@ a {
 table {
   border-collapse: collapse;
   width: 100%;
+  border-top: 2px solid var(--ink);
 }
 
 th,
 td {
   padding: 0.4rem 0.75rem;
   text-align: center;
-  border-bottom: 1px solid color-mix(in srgb, var(--fg) 15%, transparent);
+  border-bottom: 1px solid var(--line);
 }
 
 th {
-  font-size: 0.8rem;
+  font-family: var(--font-sans), sans-serif;
+  font-size: 0.72rem;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.08em;
   color: var(--muted);
+}
+
+/* Numbers, points and results in mono, like a typed crosstable. */
+td:not(.left) {
+  font-family: var(--font-mono), monospace;
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
 }
 
 th.left,
@@ -91,19 +232,71 @@ td.left {
   text-align: left;
 }
 
+/* A phone in the playing hall: tighter cells so standings fit. */
+@media (max-width: 30rem) {
+  th,
+  td {
+    padding: 0.35rem 0.4rem;
+    font-size: 0.85rem;
+  }
+
+  td:not(.left) {
+    font-size: 0.82rem;
+  }
+}
+
 td.result {
   white-space: nowrap;
-  color: var(--muted);
 }
 
-.muted {
+/* ---- badges ---- */
+
+.badge {
+  display: inline-block;
+  font-family: var(--font-mono), monospace;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  padding: 0.05rem 0.4rem;
   color: var(--muted);
+  vertical-align: middle;
 }
 
-ul.plain {
-  list-style: none;
-  padding: 0;
+.live {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--font-mono), monospace;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--flag);
 }
+
+.live::before {
+  content: "";
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--flag);
+  animation: live-pulse 2s ease-in-out infinite;
+}
+
+@keyframes live-pulse {
+  50% {
+    opacity: 0.25;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .live::before {
+    animation: none;
+  }
+}
+
+/* ---- forms ---- */
 
 form.stack {
   display: flex;
@@ -116,7 +309,7 @@ form.stack label {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   color: var(--muted);
 }
 
@@ -135,7 +328,7 @@ button {
   font: inherit;
   color: inherit;
   background: transparent;
-  border: 1px solid color-mix(in srgb, var(--fg) 30%, transparent);
+  border: 1px solid color-mix(in srgb, var(--ink) 30%, transparent);
   border-radius: 4px;
   padding: 0.35rem 0.6rem;
 }
@@ -147,25 +340,86 @@ select option {
 button {
   cursor: pointer;
   font-weight: 600;
+  color: var(--board);
+  border-color: color-mix(in srgb, var(--board) 55%, transparent);
 }
 
 button:hover {
-  background: color-mix(in srgb, var(--fg) 8%, transparent);
+  background: var(--board);
+  color: #fff;
 }
+
+@media (prefers-color-scheme: dark) {
+  button:hover {
+    color: var(--paper);
+  }
+}
+
+:focus-visible {
+  outline: 2px solid var(--board);
+  outline-offset: 2px;
+}
+
+/* ---- home: the two doors ---- */
+
+.paths {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.9rem;
+  margin: 1.5rem 0;
+}
+
+@media (max-width: 34rem) {
+  .paths {
+    grid-template-columns: 1fr;
+  }
+}
+
+a.path {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 1rem 1.1rem;
+  text-decoration: none;
+  color: inherit;
+}
+
+a.path:hover {
+  background: var(--tint);
+  border-color: color-mix(in srgb, var(--board) 55%, transparent);
+}
+
+a.path strong {
+  font-family: var(--font-condensed), var(--font-sans), sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--board);
+}
+
+a.path span {
+  font-size: 0.88rem;
+  color: var(--muted);
+}
+
+p.cta {
+  margin-top: 2rem;
+}
+
+/* ---- page furniture ---- */
 
 .topbar {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
   gap: 1rem;
+  font-size: 0.9rem;
 }
 
 .userbox {
   display: flex;
   align-items: baseline;
   gap: 0.6rem;
-}
-
-.error {
-  color: #b3261e;
+  flex-wrap: wrap;
 }

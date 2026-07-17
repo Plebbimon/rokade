@@ -72,7 +72,15 @@ export default async function TournamentPage({ params }: { params: Promise<{ id:
         </Link>
       </p>
       <h1>{t.name}</h1>
-      <p className="lead">{leadParts.join(" · ")}</p>
+      <p className="lead">
+        {leadParts.join(" · ")}
+        {!canAdmin && !(finished && complete) ? (
+          <>
+            {" "}
+            <span className="live">Direkte</span>
+          </>
+        ) : null}
+      </p>
 
       {t.invitation ? (
         <section>

@@ -157,11 +157,13 @@ Engine, domain, tiebreaks, Berger, arbiter CRUD, CI. See §5.
 4. Tournament ownership & permissions; audit log of arbiter actions
    *Done when: two clubs can run tournaments without seeing each other's admin.*
 
-**Phase 2 — The public half** *(1–3 done)*
+**Phase 2 — The public half ✅ (done)**
 1. Public tournament page: invitation, entry list, per-round results, standings ✅
 2. Terminliste: national calendar, filterable, upcoming/ongoing/finished ✅
 3. Live updates on public pages (SSE) ✅
-4. First deliberate design pass (this is when "barebones" gets fixed)
+4. First deliberate design pass ✅ — "the tournament bulletin": board-green /
+   paper / clock-flag-red palette, IBM Plex (condensed caps for the wall-list
+   voice, mono crosstables), 0-0 wordmark, light + dark
    *Done when: a parent can follow a round from their phone via a shared link.*
 
 **Phase 3 — Påmelding & member registry**

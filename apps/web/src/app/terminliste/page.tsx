@@ -74,9 +74,6 @@ export default async function Terminliste() {
 
   return (
     <main>
-      <p>
-        <Link href="/">← Rokade</Link>
-      </p>
       <h1>Terminliste</h1>
       <p className="lead">Nasjonal kalender over publiserte turneringer.</p>
 
