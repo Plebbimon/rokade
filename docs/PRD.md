@@ -85,8 +85,8 @@ public pages.
 
 ## 5. Current state (2026-07-17)
 
-Foundation and the multi-user core are built, tested (61 tests, the
-database ones against real PostgreSQL), and green in CI at
+Foundation, the multi-user core, and the public half are built, tested
+(68 tests, the database ones against real PostgreSQL), and green in CI at
 [github.com/Plebbimon/rokade](https://github.com/Plebbimon/rokade):
 
 - TRF16 parser/serializer (byte-exact golden tests)
