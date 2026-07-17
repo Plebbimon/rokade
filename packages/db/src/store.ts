@@ -13,6 +13,7 @@ function toRecord(row: Row): StoredTournament {
     id: row.id,
     createdAt: row.createdAt.toISOString(),
     clubId: row.clubId,
+    publishedAt: row.publishedAt?.toISOString() ?? null,
     tournament: row.tournament,
   };
 }
@@ -41,12 +42,17 @@ export class PgTournamentStore implements TournamentStore {
       id: record.id,
       createdAt: new Date(record.createdAt),
       clubId: record.clubId,
+      publishedAt: record.publishedAt ? new Date(record.publishedAt) : null,
       tournament: record.tournament,
+      updatedAt: new Date(),
     };
     await this.db
       .insert(tournaments)
       .values(row)
-      .onConflictDoUpdate({ target: tournaments.id, set: { tournament: row.tournament } });
+      .onConflictDoUpdate({
+        target: tournaments.id,
+        set: { tournament: row.tournament, publishedAt: row.publishedAt, updatedAt: row.updatedAt },
+      });
   }
 }
 

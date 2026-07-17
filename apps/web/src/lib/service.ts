@@ -49,6 +49,7 @@ export async function createTournament(
     id: randomUUID(),
     createdAt: new Date().toISOString(),
     clubId: input.clubId ?? null,
+    publishedAt: null,
     tournament: {
       name,
       format,
@@ -68,6 +69,59 @@ async function load(store: TournamentStore, id: string): Promise<StoredTournamen
   const record = await store.get(id);
   if (!record) throw new Error(`fant ingen turnering med id ${id}`);
   return record;
+}
+
+export interface TournamentInfoInput {
+  /** yyyy-mm-dd from a date input; stored as the domain's yyyy/mm/dd. */
+  dateBegin: string;
+  dateEnd: string;
+  timeControl: string;
+  invitation: string;
+}
+
+const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+
+/** Update the announcement fields shown on the public tournament page. */
+export async function updateTournamentInfo(
+  store: TournamentStore,
+  id: string,
+  input: TournamentInfoInput,
+): Promise<void> {
+  const record = await load(store, id);
+  const t = record.tournament;
+
+  for (const [field, value] of [
+    ["dateBegin", input.dateBegin],
+    ["dateEnd", input.dateEnd],
+  ] as const) {
+    const trimmed = value.trim();
+    if (trimmed !== "" && !DATE_PATTERN.test(trimmed)) {
+      throw new Error(`ugyldig dato: ${trimmed}`);
+    }
+    if (trimmed === "") delete t[field];
+    else t[field] = trimmed.replaceAll("-", "/");
+  }
+  if (t.dateBegin && t.dateEnd && t.dateEnd < t.dateBegin) {
+    throw new Error("sluttdatoen kan ikke være før startdatoen");
+  }
+
+  if (input.timeControl.trim() === "") delete t.timeControl;
+  else t.timeControl = input.timeControl.trim();
+  if (input.invitation.trim() === "") delete t.invitation;
+  else t.invitation = input.invitation.trim();
+
+  await store.save(record);
+}
+
+/** Publish (or retract) the tournament: visible to anyone once published. */
+export async function setPublished(
+  store: TournamentStore,
+  id: string,
+  published: boolean,
+): Promise<void> {
+  const record = await load(store, id);
+  record.publishedAt = published ? new Date().toISOString() : null;
+  await store.save(record);
 }
 
 export async function addPlayer(

@@ -75,4 +75,6 @@ export interface Tournament {
   dateEnd?: string;
   chiefArbiter?: string;
   timeControl?: string;
+  /** Invitation text (innbydelse) shown on the public tournament page. */
+  invitation?: string;
 }

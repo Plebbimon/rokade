@@ -23,6 +23,10 @@ export const tournaments = pgTable("tournaments", {
   // Owning club. Null only for rows from before clubs existed (and in the
   // file store, which has no clubs); new tournaments always carry one.
   clubId: uuid("club_id").references(() => clubs.id),
+  // Null while the tournament is an unpublished draft.
+  publishedAt: timestamp("published_at", { withTimezone: true }),
+  // Bumped on every save; the change signal for live public pages.
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 /**
@@ -111,6 +115,9 @@ export const auditLog = pgTable(
 
 export type AuditAction =
   | "tournament.create"
+  | "tournament.update"
+  | "tournament.publish"
+  | "tournament.unpublish"
   | "player.add"
   | "round.pair"
   | "result.set"

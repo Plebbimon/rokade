@@ -21,6 +21,7 @@ function record(name: string, clubId: string | null): StoredTournament {
     id: randomUUID(),
     createdAt: new Date().toISOString(),
     clubId,
+    publishedAt: null,
     tournament: { name, format: "fide-swiss", totalRounds: 5, players: [], rounds: [] },
   };
 }

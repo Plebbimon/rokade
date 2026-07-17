@@ -9,7 +9,9 @@ import {
   allResultsRecorded,
   createTournament,
   pairNextRound,
+  setPublished,
   setResult,
+  updateTournamentInfo,
 } from "./service.js";
 import { FileTournamentStore, pairingEnginePath } from "./store.js";
 
@@ -40,6 +42,65 @@ describe("FileTournamentStore + service", () => {
       createTournament(store, { name: "X", format: "nsf-monrad", totalRounds: 5 }),
     ).rejects.toThrow(/ustøttet/);
     await expect(store.get("../../etc/passwd")).rejects.toThrow(/invalid tournament id/);
+  });
+
+  it("updates announcement info and converts dates to the domain format", async () => {
+    const id = await createTournament(store, {
+      name: "Vårturneringen",
+      format: "fide-swiss",
+      totalRounds: 5,
+    });
+    await updateTournamentInfo(store, id, {
+      dateBegin: "2026-08-01",
+      dateEnd: "2026-08-02",
+      timeControl: "90+30",
+      invitation: "Velkommen til vårturneringen!",
+    });
+    let t = (await store.get(id))!.tournament;
+    expect(t.dateBegin).toBe("2026/08/01");
+    expect(t.dateEnd).toBe("2026/08/02");
+    expect(t.timeControl).toBe("90+30");
+    expect(t.invitation).toBe("Velkommen til vårturneringen!");
+
+    // Blank fields clear; bad input rejects.
+    await updateTournamentInfo(store, id, {
+      dateBegin: "2026-08-01",
+      dateEnd: "",
+      timeControl: "",
+      invitation: "Oppdatert",
+    });
+    t = (await store.get(id))!.tournament;
+    expect(t.dateEnd).toBeUndefined();
+    expect(t.timeControl).toBeUndefined();
+    await expect(
+      updateTournamentInfo(store, id, {
+        dateBegin: "1. august",
+        dateEnd: "",
+        timeControl: "",
+        invitation: "",
+      }),
+    ).rejects.toThrow(/ugyldig dato/);
+    await expect(
+      updateTournamentInfo(store, id, {
+        dateBegin: "2026-08-02",
+        dateEnd: "2026-08-01",
+        timeControl: "",
+        invitation: "",
+      }),
+    ).rejects.toThrow(/sluttdatoen/);
+  });
+
+  it("publishes and retracts", async () => {
+    const id = await createTournament(store, {
+      name: "Publiseringstest",
+      format: "fide-swiss",
+      totalRounds: 5,
+    });
+    expect((await store.get(id))!.publishedAt).toBeNull();
+    await setPublished(store, id, true);
+    expect((await store.get(id))!.publishedAt).toMatch(/^\d{4}-\d{2}-\d{2}T/);
+    await setPublished(store, id, false);
+    expect((await store.get(id))!.publishedAt).toBeNull();
   });
 
   it("sets the Berger round count from the field when round 1 is set up", async () => {

@@ -20,3 +20,24 @@ export async function accessibleTournament(id: string): Promise<StoredTournament
   const role = await membershipRole(db(), record.clubId, user.id);
   return role ? record : null;
 }
+
+export interface TournamentAccess {
+  record: StoredTournament;
+  /** True when the viewer may administer (club member / NSF admin / file mode). */
+  canAdmin: boolean;
+}
+
+/**
+ * How the current viewer — possibly anonymous — may see a tournament.
+ * Published tournaments are readable by anyone; drafts only by those who
+ * can administer them. Mutations must keep using accessibleTournament:
+ * being able to read a published tournament grants nothing else.
+ */
+export async function tournamentAccess(id: string): Promise<TournamentAccess | null> {
+  const admin = await accessibleTournament(id);
+  if (admin) return { record: admin, canAdmin: true };
+
+  const record = await tournamentStore().get(id);
+  if (record?.publishedAt) return { record, canAdmin: false };
+  return null;
+}

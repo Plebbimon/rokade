@@ -36,8 +36,9 @@ export class FileTournamentStore implements TournamentStore {
 
   private parse(raw: string): StoredTournament {
     const record = JSON.parse(raw) as StoredTournament;
-    // Files written before club ownership existed lack the field.
+    // Files written before club ownership / publishing existed lack these.
     record.clubId ??= null;
+    record.publishedAt ??= null;
     return record;
   }
 

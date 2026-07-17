@@ -23,7 +23,7 @@ export default async function Tournaments() {
     <main>
       <div className="topbar">
         <span>
-          <Link href="/">← Rokade</Link>
+          <Link href="/">← Rokade</Link> · <Link href="/terminliste">Terminliste</Link>
           {user ? (
             <>
               {" "}
@@ -47,6 +47,7 @@ export default async function Tournaments() {
             <li key={record.id}>
               <Link href={`/turneringer/${record.id}`}>{record.tournament.name}</Link>{" "}
               <span className="muted">
+                {isMultiUser() && record.publishedAt === null ? "Utkast · " : ""}
                 {record.clubId && clubName.has(record.clubId)
                   ? `${clubName.get(record.clubId)} · `
                   : ""}

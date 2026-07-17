@@ -7,7 +7,14 @@ import type { StoredTournament } from "@rokade/core";
 import { accessibleTournament } from "./access.js";
 import { audit } from "./audit.js";
 import { requireUser } from "./auth.js";
-import { addPlayer, createTournament, pairNextRound, setResult } from "./service.js";
+import {
+  addPlayer,
+  createTournament,
+  pairNextRound,
+  setPublished,
+  setResult,
+  updateTournamentInfo,
+} from "./service.js";
 import { db, tournamentStore } from "./store.js";
 
 export async function createTournamentAction(formData: FormData): Promise<void> {
@@ -50,6 +57,32 @@ async function requireAccess(
   const record = await accessibleTournament(id);
   if (!record) throw new Error("fant ikke turneringen, eller du har ikke tilgang til den");
   return { user, record };
+}
+
+export async function updateTournamentInfoAction(formData: FormData): Promise<void> {
+  const id = String(formData.get("tournamentId"));
+  const { user, record } = await requireAccess(id);
+  await updateTournamentInfo(tournamentStore(), id, {
+    dateBegin: String(formData.get("dateBegin") ?? ""),
+    dateEnd: String(formData.get("dateEnd") ?? ""),
+    timeControl: String(formData.get("timeControl") ?? ""),
+    invitation: String(formData.get("invitation") ?? ""),
+  });
+  await audit(user, "tournament.update", { clubId: record.clubId, tournamentId: id });
+  revalidatePath(`/turneringer/${id}`);
+}
+
+export async function setPublishedAction(formData: FormData): Promise<void> {
+  const id = String(formData.get("tournamentId"));
+  const { user, record } = await requireAccess(id);
+  const published = String(formData.get("published")) === "true";
+  await setPublished(tournamentStore(), id, published);
+  await audit(user, published ? "tournament.publish" : "tournament.unpublish", {
+    clubId: record.clubId,
+    tournamentId: id,
+  });
+  revalidatePath(`/turneringer/${id}`);
+  revalidatePath("/terminliste");
 }
 
 export async function addPlayerAction(formData: FormData): Promise<void> {

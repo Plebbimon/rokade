@@ -103,6 +103,9 @@ database ones against real PostgreSQL), and green in CI at
   server action
 - Append-only audit log of arbiter and club-admin actions, shown on the
   tournament page and per club
+- Public half begun: draft/publish flow with invitation (innbydelse) editing,
+  tournament pages readable by anyone once published, and the national
+  terminliste grouped by pågår/kommende/ferdigspilt
 
 ## 6. Strategy
 
@@ -154,9 +157,9 @@ Engine, domain, tiebreaks, Berger, arbiter CRUD, CI. See §5.
 4. Tournament ownership & permissions; audit log of arbiter actions
    *Done when: two clubs can run tournaments without seeing each other's admin.*
 
-**Phase 2 — The public half**
-1. Public tournament page: invitation, entry list, per-round results, standings
-2. Terminliste: national calendar, filterable, upcoming/ongoing/finished
+**Phase 2 — The public half** *(1–2 done)*
+1. Public tournament page: invitation, entry list, per-round results, standings ✅
+2. Terminliste: national calendar, filterable, upcoming/ongoing/finished ✅
 3. Live updates on public pages (SSE)
 4. First deliberate design pass (this is when "barebones" gets fixed)
    *Done when: a parent can follow a round from their phone via a shared link.*

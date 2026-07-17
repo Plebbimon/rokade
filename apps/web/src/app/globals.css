@@ -130,6 +130,7 @@ form.row {
 
 input,
 select,
+textarea,
 button {
   font: inherit;
   color: inherit;

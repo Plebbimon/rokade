@@ -5,6 +5,12 @@ export interface StoredTournament {
   createdAt: string;
   /** Owning club (multi-user mode); null in local file mode. */
   clubId: string | null;
+  /**
+   * When the organizer published the tournament, or null while it is a
+   * draft. Published tournaments are readable by anyone (public page,
+   * terminliste); drafts only by the owning club.
+   */
+  publishedAt: string | null;
   tournament: Tournament;
 }
 

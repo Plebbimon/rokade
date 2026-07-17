@@ -3,11 +3,17 @@ import { notFound } from "next/navigation";
 import { standings, type GameResult, type TiebreakKey } from "@rokade/core";
 import { tournamentAuditTrail } from "@rokade/db";
 import { AuditTable } from "@/components/audit-trail";
-import { addPlayerAction, pairNextRoundAction, setResultAction } from "@/lib/actions";
-import { requireUser } from "@/lib/auth";
-import { RESULT_LABEL, formatPoints } from "@/lib/format";
+import {
+  addPlayerAction,
+  pairNextRoundAction,
+  setPublishedAction,
+  setResultAction,
+  updateTournamentInfoAction,
+} from "@/lib/actions";
+import { RESULT_LABEL, formatAuditTime, formatPoints } from "@/lib/format";
+import { formatDomainDate } from "@/lib/terminliste";
 import { allResultsRecorded } from "@/lib/service";
-import { accessibleTournament } from "@/lib/access";
+import { tournamentAccess } from "@/lib/access";
 import { db, isMultiUser } from "@/lib/store";
 
 export const dynamic = "force-dynamic";
@@ -24,11 +30,16 @@ const RESULT_OPTIONS: GameResult[] = [
 const SWISS_TIEBREAKS: TiebreakKey[] = ["buchholz", "buchholz-cut-1", "sonneborn-berger"];
 const BERGER_TIEBREAKS: TiebreakKey[] = ["sonneborn-berger"];
 
+/** Domain "yyyy/mm/dd" → the "yyyy-mm-dd" a <input type="date"> expects. */
+function dateInputValue(d?: string): string {
+  return d ? d.replace(/\//g, "-") : "";
+}
+
 export default async function TournamentPage({ params }: { params: Promise<{ id: string }> }) {
-  await requireUser();
   const { id } = await params;
-  const record = await accessibleTournament(id);
-  if (!record) notFound();
+  const access = await tournamentAccess(id);
+  if (!access) notFound();
+  const { record, canAdmin } = access;
 
   const t = record.tournament;
   const players = new Map(t.players.map((p) => [p.id, p]));
@@ -36,19 +47,39 @@ export default async function TournamentPage({ params }: { params: Promise<{ id:
   const table = standings(t, { tiebreaks });
   const complete = allResultsRecorded(t);
   const finished = t.totalRounds > 0 && t.rounds.length >= t.totalRounds;
-  const trail = isMultiUser() ? await tournamentAuditTrail(db(), id) : [];
+  const trail = canAdmin && isMultiUser() ? await tournamentAuditTrail(db(), id) : [];
+
+  const dateSpan = t.dateBegin
+    ? t.dateEnd && t.dateEnd !== t.dateBegin
+      ? `${formatDomainDate(t.dateBegin)}–${formatDomainDate(t.dateEnd)}`
+      : formatDomainDate(t.dateBegin)
+    : "";
+  const leadParts = [t.format === "berger" ? "Berger (rundturnering)" : "FIDE Swiss"];
+  if (t.city) leadParts.push(t.city);
+  if (dateSpan) leadParts.push(dateSpan);
+  if (t.timeControl) leadParts.push(t.timeControl);
+  leadParts.push(
+    `${t.rounds.length}${t.totalRounds > 0 ? ` av ${t.totalRounds}` : ""} runder spilt`,
+  );
 
   return (
     <main>
       <p>
-        <Link href="/turneringer">← Turneringer</Link>
+        <Link href={canAdmin ? "/turneringer" : "/terminliste"}>
+          ← {canAdmin ? "Turneringer" : "Terminliste"}
+        </Link>
       </p>
       <h1>{t.name}</h1>
-      <p className="lead">
-        {t.format === "berger" ? "Berger (rundturnering)" : "FIDE Swiss"}
-        {t.city ? ` · ${t.city}` : ""} · {t.rounds.length}
-        {t.totalRounds > 0 ? ` av ${t.totalRounds}` : ""} runder spilt
-      </p>
+      <p className="lead">{leadParts.join(" · ")}</p>
+
+      {t.invitation ? (
+        <section>
+          <h2>Innbydelse</h2>
+          {t.invitation.split("\n").map((line, i) => (
+            <p key={i}>{line}</p>
+          ))}
+        </section>
+      ) : null}
 
       <h2>Spillere ({t.players.length})</h2>
       {t.players.length > 0 && (
@@ -66,12 +97,14 @@ export default async function TournamentPage({ params }: { params: Promise<{ id:
           </table>
         </div>
       )}
-      <form action={addPlayerAction} className="row">
-        <input type="hidden" name="tournamentId" value={id} />
-        <input name="name" required placeholder="Etternavn, Fornavn" />
-        <input name="rating" type="number" min={0} max={4000} placeholder="Rating" />
-        <button type="submit">Legg til spiller</button>
-      </form>
+      {canAdmin && (
+        <form action={addPlayerAction} className="row">
+          <input type="hidden" name="tournamentId" value={id} />
+          <input name="name" required placeholder="Etternavn, Fornavn" />
+          <input name="rating" type="number" min={0} max={4000} placeholder="Rating" />
+          <button type="submit">Legg til spiller</button>
+        </form>
+      )}
 
       {t.rounds.length > 0 && (
         <>
@@ -122,7 +155,7 @@ export default async function TournamentPage({ params }: { params: Promise<{ id:
                     <td className="result">
                       {board.result !== null ? (
                         RESULT_LABEL[board.result]
-                      ) : (
+                      ) : canAdmin ? (
                         <form action={setResultAction} className="row">
                           <input type="hidden" name="tournamentId" value={id} />
                           <input type="hidden" name="round" value={round.number} />
@@ -139,6 +172,8 @@ export default async function TournamentPage({ params }: { params: Promise<{ id:
                           </select>
                           <button type="submit">Lagre</button>
                         </form>
+                      ) : (
+                        "–"
                       )}
                     </td>
                   </tr>
@@ -159,7 +194,8 @@ export default async function TournamentPage({ params }: { params: Promise<{ id:
         </section>
       ))}
 
-      {!finished &&
+      {canAdmin &&
+        !finished &&
         (t.players.length < 2 ? (
           <p className="muted">Legg til minst to spillere for å sette opp første runde.</p>
         ) : complete ? (
@@ -171,6 +207,51 @@ export default async function TournamentPage({ params }: { params: Promise<{ id:
           <p className="muted">Registrer alle resultatene før neste runde kan settes opp.</p>
         ))}
       {finished && complete && <p className="lead">Turneringen er ferdigspilt.</p>}
+
+      {canAdmin && (
+        <section>
+          <h2>Innbydelse og publisering</h2>
+          <form action={updateTournamentInfoAction} className="stack">
+            <input type="hidden" name="tournamentId" value={id} />
+            <label>
+              Startdato
+              <input type="date" name="dateBegin" defaultValue={dateInputValue(t.dateBegin)} />
+            </label>
+            <label>
+              Sluttdato
+              <input type="date" name="dateEnd" defaultValue={dateInputValue(t.dateEnd)} />
+            </label>
+            <label>
+              Betenkningstid
+              <input name="timeControl" defaultValue={t.timeControl ?? ""} placeholder="90 min + 30 sek" />
+            </label>
+            <label>
+              Innbydelse
+              <textarea name="invitation" rows={6} defaultValue={t.invitation ?? ""} />
+            </label>
+            <button type="submit">Lagre info</button>
+          </form>
+
+          <form action={setPublishedAction} className="stack">
+            <input type="hidden" name="tournamentId" value={id} />
+            {record.publishedAt === null ? (
+              <>
+                <p className="muted">Utkast – bare synlig for klubben.</p>
+                <input type="hidden" name="published" value="true" />
+                <button type="submit">Publiser turneringen</button>
+              </>
+            ) : (
+              <>
+                <p className="muted">
+                  Publisert {formatAuditTime(new Date(record.publishedAt))}.
+                </p>
+                <input type="hidden" name="published" value="false" />
+                <button type="submit">Avpubliser</button>
+              </>
+            )}
+          </form>
+        </section>
+      )}
 
       {trail.length > 0 && (
         <section>

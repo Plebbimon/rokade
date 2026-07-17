@@ -41,6 +41,12 @@ export function describeAuditEntry(entry: {
   switch (entry.action) {
     case "tournament.create":
       return `opprettet turneringen «${d["name"]}»`;
+    case "tournament.update":
+      return "oppdaterte turneringsinfoen";
+    case "tournament.publish":
+      return "publiserte turneringen";
+    case "tournament.unpublish":
+      return "avpubliserte turneringen";
     case "player.add":
       return `la til spilleren ${d["name"]}${d["rating"] != null ? ` (${d["rating"]})` : ""}`;
     case "round.pair":
