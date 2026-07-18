@@ -113,6 +113,49 @@ export async function updateTournamentInfo(
   await store.save(record);
 }
 
+export interface SignupSettingsInput {
+  open: boolean;
+  /** yyyy-mm-dd from a date input, or empty for no deadline. */
+  deadline: string;
+}
+
+/** Configure the public signup form: open/closed and optional deadline. */
+export async function updateSignupSettings(
+  store: TournamentStore,
+  id: string,
+  input: SignupSettingsInput,
+): Promise<void> {
+  const record = await load(store, id);
+  const t = record.tournament;
+  const deadline = input.deadline.trim();
+  if (deadline !== "" && !DATE_PATTERN.test(deadline)) {
+    throw new Error(`ugyldig dato: ${deadline}`);
+  }
+  if (input.open) t.signupOpen = true;
+  else delete t.signupOpen;
+  if (deadline === "") delete t.signupDeadline;
+  else t.signupDeadline = deadline.replaceAll("-", "/");
+  await store.save(record);
+}
+
+/**
+ * Whether the public signup form accepts entries right now: published,
+ * opened by the organizer, and within the deadline (deadline day included).
+ * Days are compared in server-local time — a Norwegian deployment runs in
+ * Europe/Oslo.
+ */
+export function signupIsOpen(record: StoredTournament, now = new Date()): boolean {
+  const t = record.tournament;
+  if (!record.publishedAt || !t.signupOpen) return false;
+  if (!t.signupDeadline) return true;
+  const today = [
+    now.getFullYear(),
+    String(now.getMonth() + 1).padStart(2, "0"),
+    String(now.getDate()).padStart(2, "0"),
+  ].join("/");
+  return today <= t.signupDeadline;
+}
+
 /** Publish (or retract) the tournament: visible to anyone once published. */
 export async function setPublished(
   store: TournamentStore,
@@ -124,10 +167,19 @@ export async function setPublished(
   await store.save(record);
 }
 
+export interface AddPlayerInput {
+  name: string;
+  rating: number | null;
+  club?: string;
+  federation?: string;
+  fideId?: string;
+  nsfMemberNumber?: string;
+}
+
 export async function addPlayer(
   store: TournamentStore,
   id: string,
-  input: { name: string; rating: number | null },
+  input: AddPlayerInput,
 ): Promise<void> {
   const record = await load(store, id);
   const name = input.name.trim();
@@ -135,7 +187,15 @@ export async function addPlayer(
   if (record.tournament.format === "berger" && record.tournament.rounds.length > 0) {
     throw new Error("kan ikke legge til spillere etter at et berger-skjema er satt opp");
   }
-  record.tournament.players.push({ id: randomUUID(), name, rating: input.rating });
+  record.tournament.players.push({
+    id: randomUUID(),
+    name,
+    rating: input.rating,
+    ...(input.club ? { club: input.club } : {}),
+    ...(input.federation ? { federation: input.federation } : {}),
+    ...(input.fideId ? { fideId: input.fideId } : {}),
+    ...(input.nsfMemberNumber ? { nsfMemberNumber: input.nsfMemberNumber } : {}),
+  });
   await store.save(record);
 }
 

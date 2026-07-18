@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { standings, type GameResult, type TiebreakKey } from "@rokade/core";
-import { tournamentAuditTrail } from "@rokade/db";
+import { tournamentAuditTrail, tournamentSignups } from "@rokade/db";
 import { AuditTable } from "@/components/audit-trail";
 import { LiveRefresh } from "@/components/live-refresh";
 import {
@@ -11,9 +11,10 @@ import {
   setResultAction,
   updateTournamentInfoAction,
 } from "@/lib/actions";
+import { decideSignupAction, updateSignupSettingsAction } from "@/lib/signup-actions";
 import { RESULT_LABEL, formatAuditTime, formatPoints } from "@/lib/format";
 import { formatDomainDate } from "@/lib/terminliste";
-import { allResultsRecorded } from "@/lib/service";
+import { allResultsRecorded, signupIsOpen } from "@/lib/service";
 import { tournamentAccess } from "@/lib/access";
 import { db, isMultiUser } from "@/lib/store";
 
@@ -49,6 +50,7 @@ export default async function TournamentPage({ params }: { params: Promise<{ id:
   const complete = allResultsRecorded(t);
   const finished = t.totalRounds > 0 && t.rounds.length >= t.totalRounds;
   const trail = canAdmin && isMultiUser() ? await tournamentAuditTrail(db(), id) : [];
+  const signupQueue = canAdmin && isMultiUser() ? await tournamentSignups(db(), id) : [];
 
   const dateSpan = t.dateBegin
     ? t.dateEnd && t.dateEnd !== t.dateBegin
@@ -90,6 +92,13 @@ export default async function TournamentPage({ params }: { params: Promise<{ id:
           ))}
         </section>
       ) : null}
+
+      {signupIsOpen(record) && (
+        <p>
+          <Link href={`/turneringer/${id}/pamelding`}>Meld deg på</Link>
+          {t.signupDeadline ? ` – frist ${formatDomainDate(t.signupDeadline)}` : ""}
+        </p>
+      )}
 
       <h2>Spillere ({t.players.length})</h2>
       {t.players.length > 0 && (
@@ -217,6 +226,83 @@ export default async function TournamentPage({ params }: { params: Promise<{ id:
           <p className="muted">Registrer alle resultatene før neste runde kan settes opp.</p>
         ))}
       {finished && complete && <p className="lead">Turneringen er ferdigspilt.</p>}
+
+      {canAdmin && isMultiUser() && (
+        <section>
+          <h2>Påmelding</h2>
+          <form action={updateSignupSettingsAction} className="stack">
+            <input type="hidden" name="tournamentId" value={id} />
+            <label>
+              Status
+              <select name="signupOpen" defaultValue={t.signupOpen ? "true" : "false"}>
+                <option value="true">Åpen</option>
+                <option value="false">Stengt</option>
+              </select>
+            </label>
+            <label>
+              Frist
+              <input
+                type="date"
+                name="signupDeadline"
+                defaultValue={dateInputValue(t.signupDeadline)}
+              />
+            </label>
+            <button type="submit">Lagre påmelding</button>
+          </form>
+
+          {signupQueue.length > 0 ? (
+            <div className="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th className="left">Navn</th>
+                    <th>Rating</th>
+                    <th className="left">Klubb</th>
+                    <th className="left">E-post</th>
+                    <th />
+                  </tr>
+                </thead>
+                <tbody>
+                  {signupQueue.map((signup) => (
+                    <tr key={signup.id}>
+                      <td className="left">{signup.name}</td>
+                      <td>{signup.rating ?? "–"}</td>
+                      <td className="left muted">{signup.club ?? "–"}</td>
+                      <td className="left muted">{signup.email}</td>
+                      <td className="result">
+                        {signup.status === "approved" ? (
+                          <span className="badge">godkjent</span>
+                        ) : signup.status === "rejected" ? (
+                          <span className="muted">avslått</span>
+                        ) : signup.confirmedAt ? (
+                          <span className="row" style={{ margin: 0 }}>
+                            <form action={decideSignupAction} className="row" style={{ margin: 0 }}>
+                              <input type="hidden" name="tournamentId" value={id} />
+                              <input type="hidden" name="signupId" value={signup.id} />
+                              <input type="hidden" name="decision" value="approve" />
+                              <button type="submit">Godkjenn</button>
+                            </form>
+                            <form action={decideSignupAction} className="row" style={{ margin: 0 }}>
+                              <input type="hidden" name="tournamentId" value={id} />
+                              <input type="hidden" name="signupId" value={signup.id} />
+                              <input type="hidden" name="decision" value="reject" />
+                              <button type="submit">Avslå</button>
+                            </form>
+                          </span>
+                        ) : (
+                          <span className="muted">venter på e-postbekreftelse</span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <p className="muted">Ingen påmeldinger ennå.</p>
+          )}
+        </section>
+      )}
 
       {canAdmin && (
         <section>

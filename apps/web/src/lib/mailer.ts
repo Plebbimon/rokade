@@ -5,11 +5,16 @@
  */
 export interface Mailer {
   sendLoginLink(email: string, url: string): Promise<void>;
+  sendSignupConfirmation(email: string, tournamentName: string, url: string): Promise<void>;
 }
 
 class ConsoleMailer implements Mailer {
   async sendLoginLink(email: string, url: string): Promise<void> {
     console.log(`[rokade] innloggingslenke til ${email}: ${url}`);
+  }
+
+  async sendSignupConfirmation(email: string, tournamentName: string, url: string): Promise<void> {
+    console.log(`[rokade] bekreft påmelding til «${tournamentName}» for ${email}: ${url}`);
   }
 }
 

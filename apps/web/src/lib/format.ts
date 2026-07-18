@@ -59,5 +59,13 @@ export function describeAuditEntry(entry: {
       return `opprettet klubben «${d["name"]}»`;
     case "member.add":
       return `la til ${d["email"]} som ${ROLE_LABEL[d["role"] as ClubRole] ?? d["role"]}`;
+    case "signup.settings":
+      return d["open"]
+        ? `åpnet påmeldingen${d["deadline"] ? ` med frist ${d["deadline"]}` : ""}`
+        : "stengte påmeldingen";
+    case "signup.approve":
+      return `godkjente påmeldingen fra ${d["name"]}`;
+    case "signup.reject":
+      return `avslo påmeldingen fra ${d["name"]}`;
   }
 }

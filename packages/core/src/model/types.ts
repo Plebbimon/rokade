@@ -77,4 +77,8 @@ export interface Tournament {
   timeControl?: string;
   /** Invitation text (innbydelse) shown on the public tournament page. */
   invitation?: string;
+  /** Whether the public signup form accepts entries (multi-user mode). */
+  signupOpen?: boolean;
+  /** yyyy/mm/dd — last day signups are accepted; the form closes after. */
+  signupDeadline?: string;
 }

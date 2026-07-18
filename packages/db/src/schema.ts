@@ -2,6 +2,7 @@ import type { Tournament } from "@rokade/core";
 import {
   boolean,
   index,
+  integer,
   jsonb,
   pgTable,
   primaryKey,
@@ -122,7 +123,51 @@ export type AuditAction =
   | "round.pair"
   | "result.set"
   | "club.create"
-  | "member.add";
+  | "member.add"
+  | "signup.settings"
+  | "signup.approve"
+  | "signup.reject";
+
+export type SignupStatus = "pending" | "approved" | "rejected";
+
+/**
+ * Public tournament signups (påmelding). An anonymous visitor submits the
+ * form, confirms by clicking the e-mailed link (the anti-spam gate — only
+ * the SHA-256 of the token is stored, mirroring login_tokens), and the
+ * arbiter then approves or rejects. Approval copies the snapshot columns
+ * into the tournament's player list; the row stays as the paper trail.
+ */
+export const signups = pgTable(
+  "signups",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    tournamentId: uuid("tournament_id")
+      .notNull()
+      .references(() => tournaments.id, { onDelete: "cascade" }),
+    // Snapshot of the entrant, in the domain's "Lastname, Firstname" form.
+    name: text("name").notNull(),
+    // Stored lower-cased; where the confirmation link is sent.
+    email: text("email").notNull(),
+    rating: integer("rating"),
+    club: text("club"),
+    federation: text("federation"),
+    fideId: text("fide_id"),
+    // Set when the entrant picked a registry candidate rather than typing
+    // free-form: which list matched, and the id in it (NSF member number
+    // or FIDE id) — what makes federation reporting unambiguous.
+    registrySource: text("registry_source").$type<"nsf" | "fide">(),
+    registryId: text("registry_id"),
+    status: text("status").$type<SignupStatus>().notNull().default("pending"),
+    confirmTokenHash: text("confirm_token_hash").notNull().unique(),
+    confirmExpiresAt: timestamp("confirm_expires_at", { withTimezone: true }).notNull(),
+    // Null until the e-mailed link is clicked; unconfirmed signups are not
+    // eligible for approval and are pruned once the token expires.
+    confirmedAt: timestamp("confirmed_at", { withTimezone: true }),
+    decidedAt: timestamp("decided_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [index("signups_tournament_idx").on(table.tournamentId, table.createdAt)],
+);
 
 /** Browser sessions; the cookie holds the raw token, the row its SHA-256. */
 export const sessions = pgTable("sessions", {

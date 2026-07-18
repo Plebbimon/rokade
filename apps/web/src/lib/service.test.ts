@@ -11,6 +11,8 @@ import {
   pairNextRound,
   setPublished,
   setResult,
+  signupIsOpen,
+  updateSignupSettings,
   updateTournamentInfo,
 } from "./service.js";
 import { FileTournamentStore, pairingEnginePath } from "./store.js";
@@ -118,6 +120,80 @@ describe("FileTournamentStore + service", () => {
     expect(record.tournament.totalRounds).toBe(5);
     expect(record.tournament.rounds[0]!.boards).toHaveLength(2);
     expect(record.tournament.rounds[0]!.byes).toHaveLength(1);
+  });
+});
+
+describe("signup settings", () => {
+  it("stores registry identity fields on added players", async () => {
+    const id = await createTournament(store, {
+      name: "Identitetstest",
+      format: "fide-swiss",
+      totalRounds: 5,
+    });
+    await addPlayer(store, id, {
+      name: "Andersen, Anna",
+      rating: 1850,
+      club: "Bergen SK",
+      federation: "NOR",
+      fideId: "1500000",
+      nsfMemberNumber: "12345",
+    });
+    const player = (await store.get(id))!.tournament.players[0]!;
+    expect(player.club).toBe("Bergen SK");
+    expect(player.federation).toBe("NOR");
+    expect(player.fideId).toBe("1500000");
+    expect(player.nsfMemberNumber).toBe("12345");
+  });
+
+  it("opens, closes and validates the deadline", async () => {
+    const id = await createTournament(store, {
+      name: "Påmeldingstest",
+      format: "fide-swiss",
+      totalRounds: 5,
+    });
+    await updateSignupSettings(store, id, { open: true, deadline: "2026-08-01" });
+    let t = (await store.get(id))!.tournament;
+    expect(t.signupOpen).toBe(true);
+    expect(t.signupDeadline).toBe("2026/08/01");
+
+    await updateSignupSettings(store, id, { open: false, deadline: "" });
+    t = (await store.get(id))!.tournament;
+    expect(t.signupOpen).toBeUndefined();
+    expect(t.signupDeadline).toBeUndefined();
+
+    await expect(
+      updateSignupSettings(store, id, { open: true, deadline: "1. august" }),
+    ).rejects.toThrow(/ugyldig dato/);
+  });
+
+  it("is only open when published, opened and within the deadline", async () => {
+    const id = await createTournament(store, {
+      name: "Åpningstest",
+      format: "fide-swiss",
+      totalRounds: 5,
+    });
+    await updateSignupSettings(store, id, { open: true, deadline: "2026-08-01" });
+
+    // Draft: never open, regardless of settings.
+    let record = (await store.get(id))!;
+    expect(signupIsOpen(record, new Date(2026, 6, 1))).toBe(false);
+
+    await setPublished(store, id, true);
+    record = (await store.get(id))!;
+    expect(signupIsOpen(record, new Date(2026, 6, 1))).toBe(true);
+    // Deadline day is inclusive; the day after is closed.
+    expect(signupIsOpen(record, new Date(2026, 7, 1))).toBe(true);
+    expect(signupIsOpen(record, new Date(2026, 7, 2))).toBe(false);
+
+    // No deadline: open indefinitely while signupOpen is set.
+    await updateSignupSettings(store, id, { open: true, deadline: "" });
+    record = (await store.get(id))!;
+    expect(signupIsOpen(record, new Date(2030, 0, 1))).toBe(true);
+
+    // Toggled off: closed.
+    await updateSignupSettings(store, id, { open: false, deadline: "" });
+    record = (await store.get(id))!;
+    expect(signupIsOpen(record, new Date(2026, 6, 1))).toBe(false);
   });
 });
 

@@ -360,6 +360,91 @@ button:hover {
   outline-offset: 2px;
 }
 
+/* ---- player lookup (påmelding autocomplete) ---- */
+
+.lookup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  position: relative;
+}
+
+.lookup-label {
+  font-size: 0.85rem;
+}
+
+.lookup-chosen {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 0.4rem 0.6rem;
+}
+
+.lookup-list {
+  list-style: none;
+  padding: 0;
+  margin: -0.25rem 0 0;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--paper);
+  max-height: 16rem;
+  overflow-y: auto;
+}
+
+.lookup-list li {
+  margin: 0;
+}
+
+.lookup-list button {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  width: 100%;
+  text-align: left;
+  border: none;
+  border-radius: 0;
+  border-bottom: 1px solid var(--line);
+  color: var(--ink);
+  font-weight: 400;
+  padding: 0.35rem 0.6rem;
+}
+
+.lookup-list li:last-child button {
+  border-bottom: none;
+}
+
+.lookup-list button:hover,
+.lookup-list button.is-active {
+  background: var(--tint);
+  color: var(--ink);
+}
+
+.lookup-aux {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  font-size: 0.85rem;
+}
+
+.linklike {
+  border: none;
+  padding: 0;
+  background: transparent;
+  color: var(--board);
+  font-weight: 400;
+  font-size: 0.85rem;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.linklike:hover {
+  background: transparent;
+  color: var(--board-deep);
+}
+
 /* ---- home: the two doors ---- */
 
 .paths {
